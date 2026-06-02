@@ -1,0 +1,141 @@
+/* =========================
+   CALENDAR PAGE
+   ========================= */
+
+#calendar-content {
+    height: 100%;
+}
+
+.calendar-container {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header */
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.calendar-header h2 {
+    font-size: 25px;
+    font-weight: 700;
+    color: #fff;
+    margin: 0;
+}
+
+/* Nút chuyển tháng */
+
+.nav-arrows {
+    display: flex;
+    gap: 10px;
+}
+
+.nav-btn {
+    background: #fff;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.nav-btn:hover {
+    background: #f0f0f0;
+}
+
+/* =========================
+   CARD
+   ========================= */
+
+.calendar-card {
+    flex: 1;
+
+    background: #e8e4d8;
+    border-radius: 30px;
+
+    padding: 25px 40px;
+
+    display: flex;
+    flex-direction: column;
+}
+
+/* =========================
+   WEEK DAYS
+   ========================= */
+
+.weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+
+    text-align: center;
+
+    font-size: 30px;
+    font-weight: 700;
+
+    color: #e88471;
+
+    padding-bottom: 15px;
+    border-bottom: 2px solid #8e8e8e;
+}
+
+.weekdays span {
+    padding: 10px;
+}
+
+/* =========================
+   DAYS GRID
+   ========================= */
+
+.days-grid {
+    flex: 1;
+
+    display: flex;
+    flex-direction: column;
+}
+
+.days-grid .row {
+    flex: 1;
+
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+
+    border-bottom: 1px solid #8e8e8e;
+}
+
+.days-grid .row:last-child {
+    border-bottom: none;
+}
+
+.days-grid span {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+
+    padding-top: 15px;
+
+    font-size: 24px;
+    font-weight: 600;
+}
+
+/* Ngày hiện tại */
+
+.active-day {
+    width: 40px;
+    height: 40px;
+
+    margin: 10px auto 0;
+
+    border-radius: 50%;
+
+    background: #e88471;
+    color: white;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}

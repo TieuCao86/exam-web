@@ -1,0 +1,56 @@
+<aside th:fragment="sidebar" class="sidebar">
+
+  <div class="sidebar-top">
+
+    <div class="logo">
+      <img th:src="@{/images/logo.png}"
+           alt="Threads Logo"
+           class="logo-img"/>
+    </div>
+
+    <nav class="menu">
+
+      <a class="menu-item"
+         th:each="menu : ${menus}"
+         th:href="${menu.url}"
+         th:class="'menu-item ' + (${menu.url == currentPath} ? 'active' : '')">
+
+        <i th:class="${menu.icon}"></i>
+
+        <span th:text="${menu.text}">
+                    MENU
+                </span>
+
+      </a>
+
+    </nav>
+
+  </div>
+
+  <div class="sidebar-bottom">
+
+    <div class="user-profile">
+
+      <i class="far fa-user-circle avatar-icon"></i>
+
+      <div class="user-info">
+        <h4 th:text="${userName}">
+          TÊN NGƯỜI DÙNG
+        </h4>
+
+        <span th:text="${userRole == 'STUDENT'
+                        ? 'Thí sinh'
+                        : (userRole == 'TEACHER'
+                        ? 'Giáo viên'
+                        : 'Quản trị viên')}">
+                    Vai trò
+                </span>
+      </div>
+
+      <i class="fas fa-cog settings-icon"></i>
+
+    </div>
+
+  </div>
+
+</aside>

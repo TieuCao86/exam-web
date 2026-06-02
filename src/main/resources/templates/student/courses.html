@@ -1,0 +1,78 @@
+<th:block th:replace="~{layout/main-layout :: layout(~{:: #course-content})}">
+
+    <div id="course-content">
+
+        <div class="course-container">
+
+            <div class="calendar-header">
+                <h2>Các khóa học của tôi</h2>
+
+                <div class="nav-arrows">
+                    <button class="nav-btn">&laquo;</button>
+                    <button class="nav-btn">&raquo;</button>
+                </div>
+            </div>
+
+            <!-- SEARCH -->
+            <div th:replace="~{fragments/search-bar :: searchBar('/courses', 'Tìm kiếm khóa học...', 'student')}"></div>
+
+            <!-- GRID -->
+            <div class="course-grid">
+
+                <div class="course-card"
+                     th:each="c : ${courses}">
+
+                    <div class="course-header">
+                        <img th:src="${c.imageUrl}" alt="course image"/>
+                    </div>
+
+                    <div class="course-body">
+
+                        <h3 th:text="${c.courseName}">
+                            Tên khóa học
+                        </h3>
+
+                        <p>
+                            <i class="fas fa-calendar"></i>
+                            <span th:text="${c.academicYear}">2025-2026</span>
+                            -
+                            <span th:text="${c.semester}">HK1</span>
+                        </p>
+
+                        <div class="progress-box">
+                            <div class="progress-bar">
+                                <div class="progress-fill"
+                                     th:style="'width:' + ${c.progress} + '%'">
+                                </div>
+                            </div>
+
+                            <small th:text="${c.progress + '% hoàn thành'}">
+                                70%
+                            </small>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- PAGINATION -->
+            <div class="pagination">
+                <a th:if="${currentPage > 0}"
+                   th:href="@{/courses(page=${currentPage - 1})}">
+                    ‹
+                </a>
+
+                <span th:text="${currentPage + 1}">1</span>
+
+                <a th:if="${hasNext}"
+                   th:href="@{/courses(page=${currentPage + 1})}">
+                    ›
+                </a>
+            </div>
+
+        </div>
+
+    </div>
+
+</th:block>

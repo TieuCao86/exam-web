@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:fragment="layout(content)">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam System</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <link rel="stylesheet" th:href="@{/css/sidebar.css}">
+    <link rel="stylesheet" th:href="@{/css/calendar.css}">
+    <link rel="stylesheet" th:href="@{/css/courses.css}">
+    <link rel="stylesheet" th:href="@{/css/search-bar.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+<div class="app-container">
+
+    <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+
+    <main class="content">
+        <th:block th:replace="${content}"></th:block>
+    </main>
+
+</div>
+
+</body>
+</html>

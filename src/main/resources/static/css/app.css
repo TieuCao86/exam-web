@@ -1,0 +1,38 @@
+:root {
+    --primary-color: #ed8772;
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+.app-container {
+    display: flex;
+    gap: 20px;
+    height: 100vh;
+    margin: 0 auto;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+
+    padding: 30px;
+    background: var(--primary-color);
+    border-radius: 20px;
+    overflow-y: auto;
+    border: 1px solid gray;
+}
+
+.content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.content::-webkit-scrollbar-thumb {
+    background: rgba(0,0,0,0.2);
+    border-radius: 10px;
+}
