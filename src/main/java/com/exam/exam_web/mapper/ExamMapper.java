@@ -17,7 +17,6 @@ public interface ExamMapper {
     // TEACHER = ACCOUNT (FIX)
     @Mapping(source = "course.teacher.accountId", target = "teacherId")
     @Mapping(source = "course.teacher.username", target = "teacherName")
-
     ExamDTO toDTO(Exam exam);
 
     @Mapping(target = "course", ignore = true)

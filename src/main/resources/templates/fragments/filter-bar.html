@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<div th:fragment="filterBar(theme, semesterFrag, yearFrag)">
+
+    <div class="filter" th:classappend="${theme}">
+
+        <div th:replace="${semesterFrag}"></div>
+
+        <div th:replace="${yearFrag}"></div>
+
+    </div>
+
+</div>
+
+</html>

@@ -23,7 +23,9 @@ public class SecurityConfig {
                                 "/js/**",
                                 "/images/**",
                                 "/calendar/**",
-                                "/courses/**"
+                                "/courses/**",
+                                "/exams/**"
+
                         ).permitAll()
 
                         .requestMatchers("/students/**")

@@ -1,13 +1,124 @@
+/* ==========================================================================
+   1. KHUNG TRỤC TỌA ĐỘ HÀNG NGANG (Ép căng phẳng tuyệt đối)
+   ========================================================================== */
+
+.action-bar {
+    display: flex;
+    flex-direction: row;
+    gap: 16px;
+    width: 100% !important;
+    align-items: stretch; /* BẮT BUỘC: Ép tất cả các khối bọc phải cao BẰNG NHAU */
+    box-sizing: border-box;
+}
+
+/* Hai ô chính (Search và Filter) chia không gian 50/50 trên hàng ngang */
+.action-bar > th\:block,
+.action-bar > div:not(.nav-arrows) {
+    flex: 1 !important;
+    display: flex !important;
+    align-items: stretch; /* Tiếp tục ép luồng cao xuống thẻ con bên trong */
+}
+
+/* ==========================================================================
+   2. THANH TÌM KIẾM (Search Bar)
+   ========================================================================== */
+
+.search-bar {
+    width: 100% !important;
+    display: flex;
+    align-items: stretch;
+}
+
 .search-bar input {
-    width: 100%;
+    width: 100% !important;
+    height: 48px; /* Cố định chiều cao chuẩn 48px */
     padding: 12px 16px;
     border-radius: 12px;
     font-size: 16px;
+    line-height: 1.5;
     outline: none;
     border: none;
+    box-sizing: border-box;
 }
 
-/* focus chung */
-.search-bar input:focus {
+/* ==========================================================================
+   3. BỘ LỌC (Filter Bar & Select)
+   ========================================================================== */
+
+.filter {
+    display: flex !important;
+    flex: 1 !important;
+    width: 100% !important;
+    gap: 12px;
+    align-items: stretch; /* Ép các thẻ div chứa fragment select bên trong */
+}
+
+/* Sửa lỗi Thymeleaf Fragment lồng thẻ div trung gian */
+.filter > div {
+    flex: 1 !important;
+    display: flex !important;
+    align-items: stretch; /* Ép trực tiếp vào thẻ .filter-select */
+}
+
+.filter-select {
+    width: 100% !important;
+    height: 48px !important;
+    padding: 12px 40px 12px 16px; /* Tăng padding-right lên 40px để chữ không đè vào mũi tên */
+    border-radius: 12px;
+    font-size: 16px;
+    line-height: 1.5;
+    border: none;
+    outline: none;
+    color: #333;
+    cursor: pointer;
+    box-sizing: border-box;
+    transition: background 0.25s ease, box-shadow 0.25s ease;
+
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+
+    /* 🔥 THÊM MŨI TÊN SVG XUỐNG DƯỚI ĐÂY */
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23333333' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center; /* Cách lề phải 16px và căn giữa theo chiều dọc */
+    background-size: 16px; /* Kích thước mũi tên */
+}
+
+/* ==========================================================================
+   4. CỤM NÚT ĐIỀU HƯỚNG MŨI TÊN (Nav Arrows)
+   ========================================================================== */
+
+.action-bar .nav-arrows {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+    align-items: stretch; /* Ép nút bấm cao hết nấc theo thanh hàng ngang */
+}
+
+.nav-btn {
+    background: #fff;
+    border: none;
+    height: 48px !important; /* Khóa cứng chiều cao bằng chằn chặn 48px */
+    padding: 0 16px;
+    font-size: 18px;
+    font-weight: bold;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.2s, box-shadow 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+}
+
+/* ==========================================================================
+   5. HIỆU ỨNG TƯƠNG TÁC CHUNG (Hover & Focus)
+   ========================================================================== */
+
+.search-bar input:focus,
+.filter-select:focus,
+.nav-btn:focus {
     box-shadow: 0 0 0 3px rgba(0,0,0,0.08);
 }
+

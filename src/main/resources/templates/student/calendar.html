@@ -1,8 +1,8 @@
 <th:block th:replace="~{layout/main-layout :: layout(~{:: #calendar-content})}">
-
   <div id="calendar-content">
-    <div class="calendar-container">
-      <div class="calendar-header">
+    <div class="page-container">
+
+      <div class="page-header">
         <h2 th:text="${currentMonthYear != null ? currentMonthYear : 'THÁNG 1, 2026'}">THÁNG 1, 2026</h2>
         <div class="nav-arrows">
           <button class="nav-btn">&laquo;</button>
@@ -10,24 +10,62 @@
         </div>
       </div>
 
-      <div class="calendar-card">
-        <div class="weekdays">
-          <span>MON</span><span>TUE</span><span>WED</span><span>THU</span>
-          <span>FRI</span><span>SAT</span><span>SUN</span>
-        </div>
+      <div class="content-card dynamic-height">
+        <div class="calendar-wrapper">
+          <div class="weekdays">
+            <span>MON</span><span>TUE</span><span>WED</span><span>THU</span>
+            <span>FRI</span><span>SAT</span><span>SUN</span>
+          </div>
 
-        <div class="days-grid">
-          <th:block th:if="${calendarDays == null}">
-            <div class="row" th:each="rowNum : ${#numbers.sequence(1, 5)}">
-                            <span th:each="dayNum : ${#numbers.sequence(1, 7)}"
-                                  th:classappend="${rowNum == 1 and dayNum == 3} ? 'active-day' : ''"
-                                  th:text="${dayNum}">1
-                            </span>
-            </div>
-          </th:block>
+          <div class="days-grid">
+            <th:block th:if="${calendarDays == null}">
+              <div class="row" th:each="rowNum : ${#numbers.sequence(1,5)}">
+
+                <div class="day-cell"
+                     th:each="dayNum : ${#numbers.sequence(1,7)}"
+                     th:classappend="${rowNum == 1 and dayNum == 3} ? ' active-day'">
+
+                  <div class="day-number"
+                       th:text="${dayNum}">
+                    1
+                  </div>
+
+                  <div class="events">
+
+                    <div class="event">
+                      Java
+                    </div>
+
+                    <div class="event">
+                      CSDL
+                    </div>
+
+                    <div class="event">
+                      Mạng
+                    </div>
+
+                    <div class="more-event">
+                      +2 khác
+                    </div>
+
+                  </div>
+
+                  <div class="event-popup">
+                    <div>Java giữa kỳ - 08:00</div>
+                    <div>CSDL - 10:00</div>
+                    <div>Mạng - 13:00</div>
+                    <div>ATTT - 15:00</div>
+                    <div>Phân tán - 18:00</div>
+                  </div>
+
+                </div>
+
+              </div>
+            </th:block>
+          </div>
         </div>
       </div>
+
     </div>
   </div>
-
 </th:block>

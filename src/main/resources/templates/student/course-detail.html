@@ -1,0 +1,129 @@
+<th:block th:replace="~{layout/main-layout :: layout(~{:: #course-detail-content})}">
+
+    <div id="course-detail-content">
+
+        <div class="page-container">
+
+            <div class="page-header">
+                <h2>Lập trình Java</h2>
+            </div>
+
+            <div class="content-card">
+
+                <div class="course-detail-layout">
+
+                    <!-- MENU CHƯƠNG -->
+                    <div class="outline-panel">
+
+                        <h3>NỘI DUNG KHÓA HỌC</h3>
+
+                        <div class="chapter-item active">
+                            <i class="fas fa-chevron-down"></i>
+                            Chương 1: Giới thiệu
+                        </div>
+
+                        <div class="lesson-list">
+                            <a href="#">
+                                <i class="fas fa-file-alt"></i>
+                                1.1 Tổng quan
+                            </a>
+
+                            <a href="#">
+                                <i class="fas fa-link"></i>
+                                1.2 Lộ trình học
+                            </a>
+                        </div>
+
+                        <div class="chapter-item">
+                            <i class="fas fa-chevron-right"></i>
+                            Chương 2: Cơ bản
+                        </div>
+
+                        <div class="chapter-item active">
+                            <i class="fas fa-chevron-down"></i>
+                            KIỂM TRA
+                        </div>
+
+                        <div class="lesson-list">
+
+                            <a href="#">
+                                🟢 Kiểm tra TX1
+                            </a>
+
+                            <a href="#">
+                                📄 Kiểm tra TX2
+                            </a>
+
+                            <a href="#">
+                                🔒 Kiểm tra cuối kỳ
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                    <!-- NỘI DUNG -->
+                    <div class="detail-panel">
+
+                        <div class="section-title">
+                            KIỂM TRA
+                        </div>
+
+                        <div class="exam-item">
+
+                            <div class="exam-header">
+
+                                <div class="exam-icon">
+                                    <i class="fas fa-file-alt"></i>
+                                </div>
+
+                                <div>
+                                    <small>BÀI TẬP</small>
+                                    <h4>Kiểm tra TX1</h4>
+                                </div>
+
+                            </div>
+
+                            <div class="exam-body">
+                                Thực hiện theo file hướng dẫn.
+                            </div>
+
+                            <div class="exam-footer">
+                                <i class="fas fa-lock"></i>
+                                Available until 27 January 2026
+                            </div>
+
+                        </div>
+
+                        <div class="exam-item">
+
+                            <div class="exam-header">
+
+                                <div class="exam-icon">
+                                    <i class="fas fa-file-alt"></i>
+                                </div>
+
+                                <div>
+                                    <small>BÀI TẬP</small>
+                                    <h4>Kiểm tra TX2</h4>
+                                </div>
+
+                            </div>
+
+                            <div class="exam-body">
+                                Nội dung kiểm tra chương 2.
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</th:block>

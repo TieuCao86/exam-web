@@ -1,3 +1,7 @@
+*, *::before, *::after {
+    box-sizing: border-box; /* Bắt buộc để tránh phình kích thước khi có padding */
+}
+
 :root {
     --primary-color: #ed8772;
 }
@@ -5,6 +9,7 @@
 html, body {
     height: 100%;
     margin: 0;
+    font-family: sans-serif; /* Đảm bảo đồng bộ font chữ */
 }
 
 .app-container {
@@ -13,26 +18,152 @@ html, body {
     height: 100vh;
     margin: 0 auto;
     padding: 20px;
-    box-sizing: border-box;
 }
 
+/* Thẻ main chứa nội dung (Màu cam) */
 .content {
     display: flex;
     flex-direction: column;
     flex: 1;
-
     padding: 30px;
     background: var(--primary-color);
+    min-height: 0;
     border-radius: 20px;
-    overflow-y: auto;
     border: 1px solid gray;
+
+    /* QUAN TRỌNG: Khóa cuộn ở đây để nhường quyền cuộn cho thẻ chứa dữ liệu bên trong */
+    overflow: hidden;
 }
 
-.content::-webkit-scrollbar {
+#course-content,
+#exam-content,
+#calendar-content {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Khung đệm bọc nội dung trang con */
+.page-container {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    gap: 16px;
+    width: 100%;
+}
+
+/* ==========================================================================
+   2. TIÊU ĐỀ TRANG & THANH CHỨC NĂNG (NẰM NGANG CHIA 2 BÊN)
+   ========================================================================== */
+
+/* Header chứa chữ và nút chuyển hướng */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    flex-shrink: 0; /* Không cho phép bị co nhỏ lại */
+}
+
+.page-header h2 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #fff;
+    margin: 0;
+}
+
+/* Thanh chứa Search và Filter nằm ngang */
+.action-bar {
+    display: flex;
+    flex-direction: row;
+    gap: 16px;
+    width: 100%;
+    align-items: center;
+    flex-shrink: 0; /* Không cho phép bị co nhỏ lại */
+}
+
+/* Chia đôi hàng ngang: Mỗi bên chiếm đúng 50% */
+.action-bar > div {
+    flex: 1;
+    width: 50%;
+}
+
+/* Đồng bộ hiển thị Search Bar & Filter fragment */
+.search-bar, .filter {
+    width: 100% !important;
+    display: flex;
+}
+
+.search-bar input, .filter-select {
+    width: 100% !important;
+    box-sizing: border-box;
+}
+
+/* ==========================================================================
+   3. KHU VỰC CHỨA DỮ LIỆU ĐỒNG NHẤT (Content Card)
+   ========================================================================== */
+
+/* Bo tròn màu nền kem/trắng chứa dữ liệu của bạn */
+.content-card {
+    flex: 1;
+    background: #e8e4d8; /* Giữ màu kem lịch cũ hoặc #fff tùy bạn */
+    border-radius: 24px;
+    padding: 24px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+    min-height: 0;
+    overflow-y: auto !important;
+}
+
+/* Tùy biến thanh cuộn nhỏ gọn bên trong card dữ liệu */
+.content-card::-webkit-scrollbar {
     width: 6px;
 }
-
-.content::-webkit-scrollbar-thumb {
-    background: rgba(0,0,0,0.2);
+.content-card::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.15);
     border-radius: 10px;
+}
+
+/* Cấu hình đặc biệt dành riêng cho trang Lịch */
+.content-card.dynamic-height {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.calendar-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+/* ==========================================================================
+   4. CÁC THÀNH PHẦN PHỤ (Pagination & Mũi tên)
+   ========================================================================== */
+.nav-arrows {
+    display: flex;
+    gap: 8px;
+}
+
+.nav-btn {
+    background: #fff;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.nav-btn:hover {
+    background: #f0f0f0;
+}
+
+.pagination {
+    margin-top: 4px;
+    text-align: center;
+    flex-shrink: 0; /* Tránh bị méo khi thu nhỏ trình duyệt */
 }

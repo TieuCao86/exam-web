@@ -1,0 +1,43 @@
+.exam-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.exam-card {
+    background: #fff;
+    padding: 18px;
+    border-radius: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid #f0f0f0;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+}
+
+.exam-main h3 {
+    margin: 0 0 8px 0;
+    color: #333;
+}
+
+.exam-main p {
+    margin: 4px 0;
+    font-size: 14px;
+    color: #666;
+}
+
+/* Phân trang */
+.pagination {
+    margin-top: 10px;
+    text-align: center;
+}
+
+.pagination a, .pagination span {
+    padding: 6px 12px;
+    margin: 0 4px;
+    background: #fff;
+    border-radius: 8px;
+    text-decoration: none;
+    color: #333;
+    font-weight: 600;
+}
