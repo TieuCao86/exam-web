@@ -34,7 +34,7 @@ public class CalendarController {
     }
 
     @GetMapping("/courses")
-    public String getCourses(
+    public List<Course> getCourses(
             @RequestParam(defaultValue = "0") int page,
             Model model) {
 
@@ -75,7 +75,7 @@ public class CalendarController {
         model.addAttribute("semesterOptions", semesterOptions);
         model.addAttribute("yearOptions", yearOptions);
 
-        return "student/courses";
+        return fakeCourses;
     }
 
     @GetMapping("/exams")
