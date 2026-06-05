@@ -10,15 +10,15 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Controller
+@CrossOrigin(origins = "http://localhost:5173")
+@RestController
 public class CalendarController {
 
     private final CourseRepository courseRepository;
@@ -34,7 +34,7 @@ public class CalendarController {
     }
 
     @GetMapping("/courses")
-    public String getCourses(
+    public List<Course> getCourses(
             @RequestParam(defaultValue = "0") int page,
             Model model) {
 
@@ -75,7 +75,7 @@ public class CalendarController {
         model.addAttribute("semesterOptions", semesterOptions);
         model.addAttribute("yearOptions", yearOptions);
 
-        return "student/courses";
+        return fakeCourses;
     }
 
     @GetMapping("/exams")
