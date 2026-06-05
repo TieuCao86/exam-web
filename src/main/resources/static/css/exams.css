@@ -1,43 +1,141 @@
-.exam-list {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
+.exam-page {
+    background: #f5efe5;
+    border-radius: 16px;
+    overflow: hidden;
 }
+
+/* Header */
+
+.exam-banner {
+    background: #e77b63;
+    padding: 20px;
+}
+
+.exam-banner h2 {
+    color: white;
+    margin-bottom: 16px;
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.exam-filters {
+    display: flex;
+    gap: 12px;
+}
+
+.exam-filters select {
+    flex: 1;
+    padding: 10px 12px;
+    border: none;
+    border-radius: 8px;
+    background: white;
+    cursor: pointer;
+}
+
+/* Grid */
+
+.exam-grid {
+    padding: 18px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+}
+
+/* Card */
 
 .exam-card {
-    background: #fff;
-    padding: 18px;
-    border-radius: 14px;
+    background: white;
+    border-radius: 12px;
+    padding: 14px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
+    gap: 12px;
+
+    transition: .2s;
+}
+
+.exam-card:hover {
+    transform: translateY(-2px);
+}
+
+/* Header */
+
+.exam-header {
+    display: flex;
+    gap: 12px;
     align-items: center;
-    border: 1px solid #f0f0f0;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.02);
 }
 
-.exam-main h3 {
-    margin: 0 0 8px 0;
-    color: #333;
+.exam-subject-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    background: #1d6fa5;
+    color: white;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-.exam-main p {
-    margin: 4px 0;
-    font-size: 14px;
-    color: #666;
-}
-
-/* Phân trang */
-.pagination {
-    margin-top: 10px;
-    text-align: center;
-}
-
-.pagination a, .pagination span {
-    padding: 6px 12px;
-    margin: 0 4px;
-    background: #fff;
-    border-radius: 8px;
-    text-decoration: none;
-    color: #333;
+.exam-header h3 {
+    font-size: 15px;
     font-weight: 600;
+    color: #333;
+}
+
+/* Info */
+
+.exam-info p {
+    margin: 4px 0;
+    color: #666;
+    font-size: 13px;
+}
+
+.exam-info i {
+    width: 18px;
+}
+
+/* Footer */
+
+.exam-footer {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.exam-status {
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.exam-status.upcoming {
+    background: #ff8d74;
+    color: white;
+}
+
+.exam-status.running {
+    background: #3cb371;
+    color: white;
+}
+
+.exam-status.ended {
+    background: #d9d9d9;
+    color: #444;
+}
+
+/* Responsive */
+
+@media (max-width: 768px) {
+
+    .exam-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .exam-filters {
+        flex-direction: column;
+    }
 }

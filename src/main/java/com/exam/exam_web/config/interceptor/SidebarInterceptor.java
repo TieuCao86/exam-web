@@ -25,14 +25,22 @@ public class SidebarInterceptor implements HandlerInterceptor {
 
         if (modelAndView == null) return;
 
-        // giả sử user role (sau này lấy từ Security)
         Role role = Role.STUDENT;
 
         modelAndView.addObject("menus", sidebarService.getMenus(role));
-
         modelAndView.addObject("userRole", role.name());
         modelAndView.addObject("userName", "NGUYỄN BÁ VIỆT");
 
-        modelAndView.addObject("currentPath", request.getRequestURI());
+        String currentPath = request.getRequestURI();
+
+        if (currentPath.startsWith("/courses")) {
+            currentPath = "/courses";
+        } else if (currentPath.startsWith("/exams")) {
+            currentPath = "/exams";
+        } else if (currentPath.startsWith("/calendar")) {
+            currentPath = "/calendar";
+        }
+
+        modelAndView.addObject("currentPath", currentPath);
     }
 }

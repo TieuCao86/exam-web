@@ -24,7 +24,8 @@ public class SecurityConfig {
                                 "/images/**",
                                 "/calendar/**",
                                 "/courses/**",
-                                "/exams/**"
+                                "/exams/**",
+                                "/api/**"
 
                         ).permitAll()
 

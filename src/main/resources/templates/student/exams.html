@@ -1,41 +1,86 @@
 <th:block th:replace="~{layout/main-layout :: layout(~{:: #exam-content})}">
+
     <div id="exam-content">
-        <div class="page-container">
 
-            <div class="page-header">
-                <h2>Kỳ thi của tôi</h2>
-            </div>
+        <div class="exam-page">
 
-            <div class="action-bar">
-                <div th:replace="~{fragments/search-bar :: searchBar('/exams', 'Tìm kiếm kỳ thi...', 'student')}"></div>
-                <div th:replace="~{fragments/filter-bar :: filterBar(
-                    'filter-student',
-                    ~{fragments/filter-select :: filterSelect('semester', ${semesterOptions}, 'HK', 'student')},
-                    ~{fragments/filter-select :: filterSelect('year', ${yearOptions}, 'Năm học', 'student')}
-                )}"></div>
+            <!-- Header -->
+            <div class="exam-banner">
+                <h2>Kỳ Thi Sắp Tới</h2>
 
-                <div class="nav-arrows">
-                    <button class="nav-btn">&laquo;</button>
-                    <button class="nav-btn">&raquo;</button>
+                <div class="exam-filters">
+                    <select>
+                        <option>Môn học</option>
+                    </select>
+
+                    <select>
+                        <option>Khối</option>
+                    </select>
+
+                    <select>
+                        <option>Trạng thái</option>
+                    </select>
                 </div>
             </div>
 
-            <div class="content-card">
-                <div class="exam-list">
-                    <div class="exam-card" th:each="e : ${exams}">
-                        <div class="exam-main">
-                            <h3 th:text="${e.examName}">Giữa kỳ Java</h3>
-                            <p>📚 <span th:text="${e.subjectName}">Java</span></p>
-                            <p>📅 <span th:text="${#temporals.format(e.openDate, 'dd/MM/yyyy HH:mm')}">10/06/2026 09:00</span></p>
-                            <p>⏱ <span th:text="${e.durationMinutes + ' phút'}">60 phút</span></p>
+            <!-- Danh sách kỳ thi -->
+            <div class="exam-grid">
+
+                <div class="exam-card" th:each="e : ${exams}">
+
+                    <div class="exam-header">
+
+                        <div class="exam-subject-icon">
+                            <i class="fas fa-book"></i>
                         </div>
-                        <div class="exam-action">
-                            <button class="btn-start">Bắt đầu làm bài</button>
-                        </div>
+
+                        <h3 th:text="${e.examName}">
+                            Kiểm tra Giữa kỳ I - Toán
+                        </h3>
+
                     </div>
+
+                    <div class="exam-info">
+                        <p>
+                            <i class="fas fa-calendar-alt"></i>
+                            <span th:text="${#temporals.format(e.openDate,'dd/MM/yyyy')}">
+                                20/11/2025
+                            </span>
+                        </p>
+
+                        <p>
+                            <i class="fas fa-clock"></i>
+                            <span th:text="${#temporals.format(e.openDate,'HH:mm')}">
+                                09:00
+                            </span>
+                        </p>
+                    </div>
+
+                    <div class="exam-footer">
+
+                        <span class="exam-status upcoming"
+                              th:if="${e.status == 'UPCOMING'}">
+                            Vào Thi
+                        </span>
+
+                        <span class="exam-status running"
+                              th:if="${e.status == 'RUNNING'}">
+                            Đang Thi
+                        </span>
+
+                        <span class="exam-status ended"
+                              th:if="${e.status == 'ENDED'}">
+                            Sắp Diễn Ra
+                        </span>
+
+                    </div>
+
                 </div>
+
             </div>
 
         </div>
+
     </div>
+
 </th:block>
