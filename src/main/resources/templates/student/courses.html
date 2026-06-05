@@ -7,17 +7,47 @@
             </div>
 
             <div class="action-bar">
-                <div th:replace="~{fragments/search-bar :: searchBar('/courses', 'Tìm kiếm khóa học...', 'student')}"></div>
-                <div th:replace="~{fragments/filter-bar :: filterBar(
-                    'filter-student',
-                    ~{fragments/filter-select :: filterSelect('semester', ${semesterOptions}, 'HK', 'student')},
-                    ~{fragments/filter-select :: filterSelect('year', ${yearOptions}, 'Năm học', 'student')}
-                )}"></div>
 
-                <div class="nav-arrows">
-                    <button class="nav-btn">&laquo;</button>
-                    <button class="nav-btn">&raquo;</button>
-                </div>
+                <form th:action="@{/courses}" method="get" class="course-filter-form">
+
+                    <!-- Search -->
+                    <input type="text"
+                           name="keyword"
+                           placeholder="Tìm kiếm khóa học..."
+                           th:value="${keyword}">
+
+                    <!-- Semester -->
+                    <select name="semester">
+                        <option value="" th:selected="${semester == null or semester == ''}">
+                            Tất cả học kỳ
+                        </option>
+
+                        <option th:each="opt : ${semesterOptions}"
+                                th:value="${opt.value}"
+                                th:text="${opt.label}"
+                                th:selected="${opt.value == semester}">
+                        </option>
+                    </select>
+
+                    <!-- Year -->
+                    <select name="year">
+                        <option value="" th:selected="${year == null or year == ''}">
+                            Tất cả năm
+                        </option>
+
+                        <option th:each="opt : ${yearOptions}"
+                                th:value="${opt.value}"
+                                th:text="${opt.label}"
+                                th:selected="${opt.value == year}">
+                        </option>
+                    </select>
+
+                    <button type="submit">
+                        Tìm kiếm
+                    </button>
+
+                </form>
+
             </div>
 
             <div class="content-card">

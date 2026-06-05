@@ -139,4 +139,64 @@ public class CourseServiceImpl implements CourseService {
 
         return courseMapper.toDTO(courseRepository.save(course));
     }
+
+    @Override
+    public List<CourseDTO> findByFilter(
+            String semester,
+            String academicYear
+    ) {
+
+        List<Course> courses;
+
+        boolean hasSemester =
+                semester != null && !semester.isBlank();
+
+        boolean hasYear =
+                academicYear != null && !academicYear.isBlank();
+
+        if (hasSemester && hasYear) {
+
+            courses = courseRepository
+                    .findBySemesterAndAcademicYear(
+                            semester,
+                            academicYear
+                    );
+
+        } else if (hasSemester) {
+
+            courses = courseRepository
+                    .findBySemester(semester);
+
+        } else if (hasYear) {
+
+            courses = courseRepository
+                    .findByAcademicYear(academicYear);
+
+        } else {
+
+            courses = courseRepository.findAll();
+        }
+
+        return courses.stream()
+                .map(courseMapper::toDTO)
+                .toList();
+    }
+
+    @Override
+    public List<CourseDTO> search(
+            String keyword,
+            String semester,
+            String academicYear
+    ) {
+
+        return courseRepository
+                .searchCourses(
+                        keyword,
+                        semester,
+                        academicYear
+                )
+                .stream()
+                .map(courseMapper::toDTO)
+                .toList();
+    }
 }

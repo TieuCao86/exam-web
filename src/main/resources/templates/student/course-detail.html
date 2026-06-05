@@ -5,38 +5,30 @@
         <div class="page-container">
 
             <div class="page-header">
-                <h2>Lập trình Java</h2>
+                <h2 th:text="${course.courseName}">Tên khóa học</h2>
             </div>
 
             <div class="content-card">
 
                 <div class="course-detail-layout">
 
-                    <!-- MENU CHƯƠNG -->
                     <div class="outline-panel">
 
                         <h3>NỘI DUNG KHÓA HỌC</h3>
 
-                        <div class="chapter-item active">
-                            <i class="fas fa-chevron-down"></i>
-                            Chương 1: Giới thiệu
-                        </div>
+                        <div th:each="chapter, status : ${course.chapters}">
 
-                        <div class="lesson-list">
-                            <a href="#">
-                                <i class="fas fa-file-alt"></i>
-                                1.1 Tổng quan
-                            </a>
+                            <div class="chapter-item" th:classappend="${status.first} ? 'active' : ''">
+                                <i class="fas" th:classappend="${status.first} ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
+                                <span th:text="${chapter.title}">Chương 1: Giới thiệu</span>
+                            </div>
 
-                            <a href="#">
-                                <i class="fas fa-link"></i>
-                                1.2 Lộ trình học
-                            </a>
-                        </div>
-
-                        <div class="chapter-item">
-                            <i class="fas fa-chevron-right"></i>
-                            Chương 2: Cơ bản
+                            <div class="lesson-list" th:if="${not #lists.isEmpty(chapter.lessons)}">
+                                <a th:each="lesson : ${chapter.lessons}" th:href="@{/lessons/{id}(id=${lesson.lessonId})}">
+                                    <i class="fas" th:classappend="${lesson.lessonType == 'VIDEO'} ? 'fa-link' : 'fa-file-alt'"></i>
+                                    <span th:text="${lesson.title}">1.1 Tổng quan</span>
+                                </a>
+                            </div>
                         </div>
 
                         <div class="chapter-item active">
@@ -45,73 +37,45 @@
                         </div>
 
                         <div class="lesson-list">
-
-                            <a href="#">
-                                🟢 Kiểm tra TX1
+                            <a th:each="exam : ${course.exams}" th:href="@{/exams/{id}(id=${exam.examId})}">
+                                <span th:if="${exam.examName == 'Kiểm tra TX1'}">🟢 </span>
+                                <span th:if="${exam.examName == 'Kiểm tra TX2'}">📄 </span>
+                                <span th:if="${exam.examName == 'Kiểm tra cuối kỳ'}">🔒 </span>
+                                <span th:text="${exam.examName}">Kiểm tra TX1</span>
                             </a>
-
-                            <a href="#">
-                                📄 Kiểm tra TX2
-                            </a>
-
-                            <a href="#">
-                                🔒 Kiểm tra cuối kỳ
-                            </a>
-
                         </div>
 
                     </div>
 
-                    <!-- NỘI DUNG -->
+
                     <div class="detail-panel">
 
                         <div class="section-title">
                             KIỂM TRA
                         </div>
 
-                        <div class="exam-item">
+                        <div class="exam-item" th:each="exam : ${course.exams}">
 
                             <div class="exam-header">
-
                                 <div class="exam-icon">
                                     <i class="fas fa-file-alt"></i>
                                 </div>
-
                                 <div>
                                     <small>BÀI TẬP</small>
-                                    <h4>Kiểm tra TX1</h4>
+                                    <h4 th:text="${exam.examName}">Kiểm tra TX1</h4>
                                 </div>
-
                             </div>
 
                             <div class="exam-body">
-                                Thực hiện theo file hướng dẫn.
+                                <span th:text="${exam.examName == 'Kiểm tra TX1'} ? 'Thực hiện theo file hướng dẫn.' : 'Nội dung kiểm tra chương 2.'">
+                                    Nội dung hướng dẫn làm bài...
+                                </span>
                             </div>
 
-                            <div class="exam-footer">
+                            <div class="exam-footer" th:if="${exam.closeDate != null}">
                                 <i class="fas fa-lock"></i>
-                                Available until 27 January 2026
-                            </div>
-
-                        </div>
-
-                        <div class="exam-item">
-
-                            <div class="exam-header">
-
-                                <div class="exam-icon">
-                                    <i class="fas fa-file-alt"></i>
-                                </div>
-
-                                <div>
-                                    <small>BÀI TẬP</small>
-                                    <h4>Kiểm tra TX2</h4>
-                                </div>
-
-                            </div>
-
-                            <div class="exam-body">
-                                Nội dung kiểm tra chương 2.
+                                &nbsp;Available until:&nbsp;
+                                <span th:text="${#temporals.format(exam.closeDate, 'dd-MM-yyyy HH:mm')}">27-01-2026 23:59</span>
                             </div>
 
                         </div>

@@ -12,7 +12,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@JsonIgnoreProperties({"enrollments", "hibernateLazyInitializer", "handler"})
+@JsonIgnoreProperties({"enrollments", "chapters", "hibernateLazyInitializer", "handler"})
 
 @Entity
 @Table(name = "courses")
@@ -49,4 +49,12 @@ public class Course {
 
     @OneToMany(mappedBy = "course")
     private List<Enrollment> enrollments;
+
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("orderIndex ASC")
+    private List<Chapter> chapters;
+
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("openDate ASC")
+    private List<Exam> exams;
 }

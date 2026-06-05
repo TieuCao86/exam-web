@@ -4,6 +4,7 @@ import lombok.*;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -25,4 +26,6 @@ public class CourseDTO implements Serializable {
     private String teacherId;
     private String teacherName;
     private String status;
+    private List<ChapterDTO> chapters;
+    private List<ExamDTO> exams;
 }

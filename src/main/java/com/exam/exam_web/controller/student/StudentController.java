@@ -5,9 +5,7 @@ import com.exam.exam_web.dto.ExamDTO;
 import com.exam.exam_web.dto.OptionDTO;
 import com.exam.exam_web.entity.Course;
 import com.exam.exam_web.repository.CourseRepository;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import com.exam.exam_web.services.CourseService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -17,15 +15,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Controller
-@CrossOrigin(origins = "http://localhost:5173")
-@RestController
-public class CalendarController {
+public class StudentController {
 
-    private final CourseRepository courseRepository;
+    private final CourseService courseService;
 
-    // constructor injection
-    public CalendarController(CourseRepository courseRepository) {
-        this.courseRepository = courseRepository;
+    public StudentController(CourseService courseService) {
+        this.courseService = courseService;
     }
 
     @GetMapping("/calendar")
@@ -34,48 +29,44 @@ public class CalendarController {
     }
 
     @GetMapping("/courses")
-    public List<Course> getCourses(
-            @RequestParam(defaultValue = "0") int page,
-            Model model) {
+    public String getCourses(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String semester,
+            @RequestParam(required = false) String year,
+            Model model
+    ) {
 
-        List<Course> fakeCourses = new ArrayList<>();
+        keyword = (keyword == null || keyword.isBlank()) ? null : keyword.trim();
+        semester = (semester == null || semester.isBlank()) ? null : semester.trim();
+        year = (year == null || year.isBlank()) ? null : year.trim();
 
-        for (int i = 1; i <= 12; i++) {
-            Course c = new Course();
-            c.setCourseId(String.valueOf(i));
-            c.setCourseName("Khóa học " + i);
-            c.setAcademicYear(i % 2 == 0 ? "2025-2026" : "2024-2025");
-            c.setImageUrl("/images/background_course.jpg");
-            c.setSemester(i % 2 == 0 ? "HK1" : "HK2");
-            c.setProgress((i * 10) % 100);
-            fakeCourses.add(c);
-        }
+        List<CourseDTO> courses =
+                courseService.search(
+                        keyword,
+                        semester,
+                        year
+                );
 
-        // =========================
-        // FILTER OPTIONS (TEST DATA)
-        // =========================
+        model.addAttribute("courses", courses);
 
-        List<OptionDTO> semesterOptions = List.of(
+        model.addAttribute("keyword", keyword);
+        model.addAttribute("selectedSemester", semester);
+        model.addAttribute("selectedYear", year);
+
+        model.addAttribute("semesterOptions", List.of(
                 new OptionDTO("HK1", "Học kỳ 1"),
                 new OptionDTO("HK2", "Học kỳ 2")
-        );
+        ));
 
-        List<OptionDTO> yearOptions = List.of(
+        model.addAttribute("yearOptions", List.of(
                 new OptionDTO("2024-2025", "2024-2025"),
                 new OptionDTO("2025-2026", "2025-2026")
-        );
+        ));
 
-        // =========================
-        // MODEL
-        // =========================
-        model.addAttribute("courses", fakeCourses);
-        model.addAttribute("currentPage", page);
-        model.addAttribute("hasNext", true);
+        model.addAttribute("currentPage", 0);
+        model.addAttribute("hasNext", false);
 
-        model.addAttribute("semesterOptions", semesterOptions);
-        model.addAttribute("yearOptions", yearOptions);
-
-        return fakeCourses;
+        return "student/courses";
     }
 
     @GetMapping("/exams")
@@ -134,10 +125,11 @@ public class CalendarController {
             @PathVariable String id,
             Model model) {
 
-        CourseDTO course = new CourseDTO();
+        CourseDTO course = courseService.findById(id);
 
-        course.setCourseId(id);
-        course.setCourseName("Khóa học " + id);
+        if (course == null) {
+            return "redirect:/courses";
+        }
 
         model.addAttribute("course", course);
 

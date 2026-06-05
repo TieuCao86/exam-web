@@ -40,4 +40,15 @@ public interface CourseService {
             String courseId,
             String teacherId
     );
+
+    List<CourseDTO> findByFilter(
+            String semester,
+            String academicYear
+    );
+
+    List<CourseDTO> search(
+            String keyword,
+            String semester,
+            String academicYear
+    );
 }
