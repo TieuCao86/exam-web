@@ -10,6 +10,7 @@
 
 .course-card {
     background: #fff;
+    color: #000;
     border-radius: 14px;
     overflow: hidden;
     border: 1px solid #f0f0f0;
@@ -50,4 +51,10 @@
 .progress-fill {
     height: 100%;
     background: #4caf50;
+}
+
+.course-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
 }

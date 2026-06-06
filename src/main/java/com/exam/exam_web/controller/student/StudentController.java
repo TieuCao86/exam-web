@@ -3,25 +3,22 @@ package com.exam.exam_web.controller.student;
 import com.exam.exam_web.dto.CourseDTO;
 import com.exam.exam_web.dto.ExamDTO;
 import com.exam.exam_web.dto.OptionDTO;
-import com.exam.exam_web.entity.Course;
-import com.exam.exam_web.repository.CourseRepository;
 import com.exam.exam_web.services.CourseService;
+import com.exam.exam_web.services.ExamService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
+@RequiredArgsConstructor
 @Controller
 public class StudentController {
 
     private final CourseService courseService;
-
-    public StudentController(CourseService courseService) {
-        this.courseService = courseService;
-    }
+    private final ExamService examService;
 
     @GetMapping("/calendar")
     public String showCalendar() {
@@ -32,6 +29,7 @@ public class StudentController {
     public String getCourses(
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String semester,
+
             @RequestParam(required = false) String year,
             Model model
     ) {
@@ -72,50 +70,7 @@ public class StudentController {
     @GetMapping("/exams")
     public String getExams(Model model) {
 
-        List<ExamDTO> fakeExams = new ArrayList<>();
-
-        for (int i = 1; i <= 12; i++) {
-
-            ExamDTO e = new ExamDTO();
-
-            e.setExamId("EX" + i);
-            e.setExamName("Kỳ thi giữa kỳ " + i);
-
-            e.setPassword(i % 2 == 0 ? "123456" : null);
-
-            e.setCreatedAt(LocalDateTime.now().minusDays(i));
-            e.setUpdatedAt(LocalDateTime.now());
-
-            e.setQuestionAmount(20 + i);
-
-            e.setOpenDate(LocalDateTime.now().minusDays(1));
-            e.setCloseDate(LocalDateTime.now().plusDays(2));
-
-            e.setDurationMinutes(60);
-
-            e.setCourseId("C" + i);
-            e.setCourseName("Khóa học " + i);
-
-            e.setSubjectId("S" + i);
-            e.setSubjectName("Lập trình Java " + i);
-
-            e.setTeacherId("T" + i);
-            e.setTeacherName("Giảng viên " + i);
-
-            // ================= STATUS LOGIC TEST =================
-            if (i % 3 == 0) {
-                e.setCloseDate(LocalDateTime.now().minusDays(1)); // đã đóng
-            } else if (i % 2 == 0) {
-                e.setOpenDate(LocalDateTime.now().minusHours(2)); // đang mở
-                e.setCloseDate(LocalDateTime.now().plusDays(1));
-            } else {
-                e.setOpenDate(LocalDateTime.now().plusDays(1)); // chưa mở
-            }
-
-            fakeExams.add(e);
-        }
-
-        model.addAttribute("exams", fakeExams);
+        model.addAttribute("exams", examService.findAll());
 
         return "student/exams";
     }

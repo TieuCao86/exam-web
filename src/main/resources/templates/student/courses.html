@@ -3,7 +3,7 @@
         <div class="page-container">
 
             <div class="page-header">
-                <h2>Các khóa học của tôi</h2>
+                <h2>CÁC KHÓA HỌC CỦA TÔI</h2>
             </div>
 
             <div class="action-bar">
@@ -17,7 +17,7 @@
                            th:value="${keyword}">
 
                     <!-- Semester -->
-                    <select name="semester">
+                    <select name="semester" class="filter-select">
                         <option value="" th:selected="${semester == null or semester == ''}">
                             Tất cả học kỳ
                         </option>
@@ -30,7 +30,7 @@
                     </select>
 
                     <!-- Year -->
-                    <select name="year">
+                    <select name="year" class="filter-select">
                         <option value="" th:selected="${year == null or year == ''}">
                             Tất cả năm
                         </option>

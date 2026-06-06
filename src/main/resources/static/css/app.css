@@ -76,12 +76,8 @@ html, body {
 
 /* Thanh chứa Search và Filter nằm ngang */
 .action-bar {
-    display: flex;
-    flex-direction: row;
-    gap: 16px;
-    width: 100%;
-    align-items: center;
-    flex-shrink: 0; /* Không cho phép bị co nhỏ lại */
+    padding: 12px;
+    border-radius: 12px;
 }
 
 /* Chia đôi hàng ngang: Mỗi bên chiếm đúng 50% */
@@ -166,4 +162,82 @@ html, body {
     margin-top: 4px;
     text-align: center;
     flex-shrink: 0; /* Tránh bị méo khi thu nhỏ trình duyệt */
+}
+
+.course-filter-form {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+/* INPUT + SELECT CHUNG STYLE SYSTEM */
+.course-filter-form input,
+.course-filter-form select {
+    height: 38px;
+    padding: 0 12px;
+
+    border: 1px solid rgba(0,0,0,0.15);
+    border-radius: 10px;
+
+    font-size: 13px;
+    outline: none;
+
+    background: #fff;
+    color: #333;
+
+    transition: 0.2s;
+}
+
+/* FOCUS STATE */
+.course-filter-form input:focus,
+.course-filter-form select:focus {
+    border-color: #4a6cf7;
+    box-shadow: 0 0 0 3px rgba(74,108,247,0.15);
+}
+
+/* SEARCH INPUT = LỚN NHẤT */
+.course-filter-form input {
+    flex: 2;
+    min-width: 180px;
+}
+
+/* SELECT = BẰNG NHAU */
+.course-filter-form select {
+    flex: 1;
+    min-width: 140px;
+}
+
+/* BUTTON */
+.course-filter-form button {
+    height: 38px;
+    padding: 0 16px;
+
+    border: none;
+    border-radius: 10px;
+
+    background: #4a6cf7;
+    color: #fff;
+
+    font-size: 13px;
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+.course-filter-form button:hover {
+    background: #3b5bdb;
+}
+
+@media (max-width: 768px) {
+    .course-filter-form {
+        flex-direction: column;
+    }
+
+    .course-filter-form input,
+    .course-filter-form select,
+    .course-filter-form button {
+        width: 100%;
+    }
 }

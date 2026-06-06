@@ -142,21 +142,6 @@ public class ExamServiceImpl implements ExamService {
                 .toList();
     }
 
-    @Override
-    public List<ExamDTO> findAvailableExams(String userId) {
-        return List.of();
-    }
-
-    @Override
-    public List<ExamDTO> findUpcomingExams(String userId) {
-        return List.of();
-    }
-
-    @Override
-    public List<ExamDTO> findExpiredExams(String userId) {
-        return List.of();
-    }
-
     // ================= BUSINESS =================
 
     @Override
@@ -211,5 +196,29 @@ public class ExamServiceImpl implements ExamService {
 
     private void requireAdminOrTeacher() {
         // Spring Security later
+    }
+
+    @Override
+    public List<ExamDTO> findAvailableExams(String userId) {
+        return examRepository.findAvailableExams(userId, LocalDateTime.now())
+                .stream()
+                .map(examMapper::toDTO)
+                .toList();
+    }
+
+    @Override
+    public List<ExamDTO> findUpcomingExams(String userId) {
+        return examRepository.findUpcomingExams(userId, LocalDateTime.now())
+                .stream()
+                .map(examMapper::toDTO)
+                .toList();
+    }
+
+    @Override
+    public List<ExamDTO> findExpiredExams(String userId) {
+        return examRepository.findExpiredExams(userId, LocalDateTime.now())
+                .stream()
+                .map(examMapper::toDTO)
+                .toList();
     }
 }

@@ -2,76 +2,72 @@
 
     <div id="exam-content">
 
-        <div class="exam-page">
+        <div class="page-container">
 
-            <!-- Header -->
-            <div class="exam-banner">
-                <h2>Kỳ Thi Sắp Tới</h2>
+            <!-- HEADER -->
+            <div class="page-header">
+                <h2>CÁC KÌ THI CỦA BẠN</h2>
+            </div>
 
-                <div class="exam-filters">
-                    <select>
+            <!-- ACTION BAR (giữ cấu trúc sẵn) -->
+            <div class="action-bar">
+
+                <div>
+                    <select class="filter-select">
                         <option>Môn học</option>
                     </select>
+                </div>
 
-                    <select>
-                        <option>Khối</option>
+                <div>
+                    <select class="filter-select">
+                        <option>Loại bài thi</option>
                     </select>
+                </div>
 
-                    <select>
+                <div>
+                    <select class="filter-select">
                         <option>Trạng thái</option>
                     </select>
                 </div>
+
             </div>
 
-            <!-- Danh sách kỳ thi -->
-            <div class="exam-grid">
+            <!-- CONTENT CARD (QUAN TRỌNG - dùng lại scroll system) -->
+            <div class="content-card">
 
-                <div class="exam-card" th:each="e : ${exams}">
+                <!-- GRID -->
+                <div class="exam-grid">
 
-                    <div class="exam-header">
+                    <div class="exam-card" th:each="e : ${exams}">
 
-                        <div class="exam-subject-icon">
-                            <i class="fas fa-book"></i>
+                        <div class="exam-title">
+                            <h3 th:text="${e.examName}">IELTS Simulation Listening test 1</h3>
                         </div>
 
-                        <h3 th:text="${e.examName}">
-                            Kiểm tra Giữa kỳ I - Toán
-                        </h3>
+                        <div class="exam-info">
 
-                    </div>
+                            <div class="info-item">
+                                <i class="fas fa-clock"></i>
+                                <span th:text="${e.durationMinutes + ' phút'}">40 phút</span>
+                            </div>
 
-                    <div class="exam-info">
-                        <p>
-                            <i class="fas fa-calendar-alt"></i>
-                            <span th:text="${#temporals.format(e.openDate,'dd/MM/yyyy')}">
-                                20/11/2025
-                            </span>
-                        </p>
+                            <div class="info-item">
+                                <i class="fas fa-question-circle"></i>
+                                <span th:text="${e.questionAmount + ' câu hỏi'}">40 câu hỏi</span>
+                            </div>
 
-                        <p>
-                            <i class="fas fa-clock"></i>
-                            <span th:text="${#temporals.format(e.openDate,'HH:mm')}">
-                                09:00
-                            </span>
-                        </p>
-                    </div>
+                        </div>
 
-                    <div class="exam-footer">
+                        <div class="exam-tags">
+                            <span class="tag">#IELTS Academic</span>
+                        </div>
 
-                        <span class="exam-status upcoming"
-                              th:if="${e.status == 'UPCOMING'}">
-                            Vào Thi
-                        </span>
-
-                        <span class="exam-status running"
-                              th:if="${e.status == 'RUNNING'}">
-                            Đang Thi
-                        </span>
-
-                        <span class="exam-status ended"
-                              th:if="${e.status == 'ENDED'}">
-                            Sắp Diễn Ra
-                        </span>
+                        <div class="exam-footer">
+                            <a class="btn-detail"
+                               th:href="@{'/exams/' + ${e.examId}}">
+                                Chi tiết
+                            </a>
+                        </div>
 
                     </div>
 
