@@ -1,0 +1,79 @@
+<th:block th:replace="~{layout/main-layout :: layout(~{:: #history-content})}">
+
+    <div id="history-content">
+
+        <div class="page-container">
+
+            <div class="page-header">
+                <h2>LỊCH SỬ LÀM BÀI</h2>
+            </div>
+
+            <div class="content-card">
+
+                <div class="history-grid">
+
+                    <div class="history-card"
+                         th:each="item : ${histories}">
+
+                        <div class="history-title">
+
+                            <h3 th:text="${item.examName}">
+                                TOEIC Mock Test 01
+                            </h3>
+
+                            <span class="history-subject"
+                                  th:text="${item.subjectName}">
+                                Tiếng Anh
+                            </span>
+
+                        </div>
+
+                        <div class="history-info">
+
+                            <div class="info-row">
+
+                                <span>Số lần làm</span>
+
+                                <strong th:text="${item.totalAttempts}">
+                                    3
+                                </strong>
+
+                            </div>
+
+                            <div class="info-row">
+
+                                <span>Điểm cao nhất</span>
+
+                                <strong th:text="${item.bestScore}">
+                                    9.0
+                                </strong>
+
+                            </div>
+
+                            <div class="info-row">
+
+                                <span>Lần cuối</span>
+
+                                <strong th:text="${#temporals.format(item.lastSubmittedAt,'dd/MM/yyyy HH:mm')}">
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+                        <a class="btn-detail"
+                           th:href="@{'/history/' + ${item.examId}}">
+                            Xem chi tiết
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</th:block>

@@ -1,36 +1,38 @@
 package com.exam.exam_web.services;
 
-import com.exam.exam_web.dto.ExamHistoryDTO;
+import com.exam.exam_web.dto.ExamAttemptHistoryDTO;
+import com.exam.exam_web.dto.ExamAttemptResultDTO;
+import com.exam.exam_web.dto.ExamHistorySummaryDTO;
 
 import java.util.List;
 
 public interface ExamHistoryService {
 
-    List<ExamHistoryDTO>
-    findByUserAndExam(
+    // Trang /history
+    List<ExamHistorySummaryDTO> findHistoryByUser(String userId);
+
+    // Trang /history/{examId}
+    List<ExamAttemptHistoryDTO> findAttempts(
             String userId,
             String examId
     );
 
-    List<ExamHistoryDTO>
-    findByUser(
-            String userId
+    // Trang /history/attempt/{historyId}
+    ExamAttemptResultDTO findAttemptResult(
+            String examHistoryId
     );
 
-    List<ExamHistoryDTO>
-    findByExam(
-            String examId
-    );
-
-    int getMaxAttemptNumber(
+    Integer getMaxAttemptNumber(
             String userId,
             String examId
     );
 
-    ExamHistoryDTO submitExam(
+    ExamAttemptResultDTO submitExam(
             String userId,
             String examId,
             int[] selectedIndexes,
             int elapsedSeconds
     );
+
+    String startExam(String userId, String examId);
 }

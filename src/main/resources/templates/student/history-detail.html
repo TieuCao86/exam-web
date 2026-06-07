@@ -1,0 +1,68 @@
+<th:block th:replace="~{layout/main-layout :: layout(~{:: #history-detail-content})}">
+
+    <div id="history-detail-content">
+
+        <div class="page-container">
+
+            <div class="page-header">
+
+                <h2 th:text="${examName}">
+                    TOEIC Mock Test 01
+                </h2>
+
+            </div>
+
+            <div class="content-card">
+
+                <h3>Các lần làm bài</h3>
+
+                <table class="history-table">
+
+                    <thead>
+
+                    <tr>
+                        <th>Lần làm</th>
+                        <th>Điểm</th>
+                        <th>Thời gian</th>
+                        <th>Ngày nộp</th>
+                        <th></th>
+                    </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                    <tr th:each="a : ${attempts}">
+
+                        <td th:text="${a.attemptNumber}">1</td>
+
+                        <td th:text="${a.score}">9.0</td>
+
+                        <td th:text="${a.elapsedSeconds / 60 + ' phút'}">
+                        </td>
+
+                        <td th:text="${#temporals.format(a.submittedAt,'dd/MM/yyyy HH:mm')}">
+                        </td>
+
+                        <td>
+
+                            <a class="btn-detail"
+                               th:href="@{'/history/attempt/' + ${a.examHistoryId}}">
+                                Xem lại
+                            </a>
+
+                        </td>
+
+                    </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</th:block>

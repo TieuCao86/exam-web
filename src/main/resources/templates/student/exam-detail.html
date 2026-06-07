@@ -13,13 +13,11 @@
 
             <!-- HƯỚNG DẪN -->
             <div class="content-card">
-
                 <h3>Hướng dẫn</h3>
 
-                <div class="instruction-content"
-                     th:utext="${exam.description}">
+                <div class="instruction-list"
+                     th:text="${exam.description}">
                 </div>
-
             </div>
 
             <!-- THÔNG TIN CHUNG -->
@@ -155,11 +153,8 @@
 
                     <h3>Bài kiểm tra trắc nghiệm</h3>
 
-                    <a class="btn-submit"
-                       th:href="@{'/exams/' + ${exam.examId} + '/attempt'}">
-
+                    <a class="btn-submit" th:href="@{'/exams/' + ${exam.examId} + '/start'}">
                         Bắt đầu làm bài
-
                     </a>
 
                 </div>
@@ -219,9 +214,7 @@
 
                         <td>
 
-                            <a th:href="@{'/attempts/' + ${attempt.attemptId}}">
-                                Xem lại
-                            </a>
+                            <a th:href="@{'/history/attempt/' + ${attempt.examHistoryId}}">Xem lại</a>
 
                         </td>
 

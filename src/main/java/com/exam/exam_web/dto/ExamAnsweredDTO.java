@@ -17,4 +17,8 @@ public class ExamAnsweredDTO implements Serializable {
     private String selectedAnswerId;
     private int orderInExam;
     private double grade;
+    private String questionSnapshot;
+    private String answerSnapshot;
+
+    private String courseName;
 }

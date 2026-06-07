@@ -1,0 +1,40 @@
+.history-table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+.history-table th,
+.history-table td{
+    padding:12px;
+    border-bottom:1px solid #ddd;
+    text-align:left;
+}
+
+.history-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
+    gap:20px;
+}
+
+.history-card{
+    background:#fff;
+    padding:20px;
+    border-radius:16px;
+}
+
+.history-info{
+    margin:16px 0;
+}
+
+.info-row{
+    display:flex;
+    justify-content:space-between;
+    margin-bottom:8px;
+}
+
+.question-review{
+    padding:16px;
+    border:1px solid #ddd;
+    border-radius:12px;
+    margin-bottom:16px;
+}

@@ -1,0 +1,101 @@
+<th:block th:replace="~{layout/main-layout :: layout(~{:: #attempt-result-content})}">
+
+    <div id="attempt-result-content">
+
+        <div class="page-container">
+
+            <div class="page-header">
+
+                <h2 th:text="${result.examName}">
+                    TOEIC Mock Test 01
+                </h2>
+
+            </div>
+
+            <div class="content-card">
+
+                <h3>Kết quả lần làm</h3>
+
+                <div class="result-summary">
+
+                    <div class="status-row">
+                        <span>Lần làm:</span>
+                        <strong th:text="${result.attemptNumber}">
+                            2
+                        </strong>
+                    </div>
+
+                    <div class="status-row">
+                        <span>Điểm:</span>
+                        <strong th:text="${result.score}">
+                            9.0
+                        </strong>
+                    </div>
+
+                    <div class="status-row">
+                        <span>Số câu đúng:</span>
+                        <strong th:text="${result.correctAnswers + '/' + result.totalQuestions}">
+                        </strong>
+                    </div>
+
+                    <div class="status-row">
+                        <span>Thời gian:</span>
+                        <strong th:text="${result.elapsedSeconds / 60 + ' phút'}">
+                        </strong>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="content-card">
+
+                <h3>Chi tiết đáp án</h3>
+
+                <div class="question-review"
+                     th:each="a : ${result.answers}">
+
+                    <h4>
+                        Câu
+                        <span th:text="${a.orderInExam}">1</span>
+                    </h4>
+
+                    <p th:text="${a.questionContent}">
+                    </p>
+
+                    <div class="status-row">
+
+                        <span>Bạn chọn:</span>
+
+                        <strong th:text="${a.selectedAnswer}">
+                        </strong>
+
+                    </div>
+
+                    <div class="status-row">
+
+                        <span>Đáp án đúng:</span>
+
+                        <strong th:text="${a.correctAnswer}">
+                        </strong>
+
+                    </div>
+
+                    <div class="status-row">
+
+                        <span>Kết quả:</span>
+
+                        <strong th:text="${a.correct ? 'Đúng' : 'Sai'}">
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</th:block>

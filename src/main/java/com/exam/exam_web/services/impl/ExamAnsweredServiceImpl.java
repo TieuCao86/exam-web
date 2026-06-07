@@ -46,7 +46,7 @@ public class ExamAnsweredServiceImpl implements ExamAnsweredService {
         }
 
         return examAnsweredRepository
-                .findByExamHistory_ExamHistoryIdAndQuestion_QuestionId(
+                .findByExamHistory_ExamHistoryIdAndQuestionId(
                         examHistoryId,
                         questionId
                 )

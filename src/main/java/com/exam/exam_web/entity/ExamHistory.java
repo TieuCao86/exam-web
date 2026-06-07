@@ -32,7 +32,9 @@ public class ExamHistory {
 
     private int elapsedSeconds;
 
-    private double score;
+    private Double score;
+
+    private String snapshotId;
 
     private LocalDateTime submittedAt;
 }

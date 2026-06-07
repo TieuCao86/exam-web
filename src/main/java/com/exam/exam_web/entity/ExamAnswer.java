@@ -22,15 +22,15 @@ public class ExamAnswer {
     @JoinColumn(name = "exam_history_id", nullable = false)
     private ExamHistory examHistory;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "question_id", nullable = false)
-    private Question question;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "selected_answer_id")
-    private Answer selectedAnswer;
+    private String questionId;
 
     private boolean correct;
 
     private double grade;
+
+    @Column(columnDefinition = "TEXT")
+    private String questionSnapshot;
+
+    @Column(columnDefinition = "TEXT")
+    private String selectedAnswerSnapshot;
 }

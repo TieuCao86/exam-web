@@ -9,8 +9,8 @@
     margin-bottom:20px;
 }
 
-.instruction-content{
-    line-height:1.8;
+.instruction-list {
+    white-space: pre-line;
 }
 
 .info-box{
@@ -63,12 +63,13 @@
 }
 
 .btn-submit{
-    background:var(--primary-color);
+    background:green;
     color:white;
     border:none;
     padding:12px 24px;
     border-radius:8px;
     cursor:pointer;
+    text-decoration: none;
 }
 
 .btn-submit:hover{

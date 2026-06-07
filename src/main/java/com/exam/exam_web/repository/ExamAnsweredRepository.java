@@ -10,7 +10,7 @@ public interface ExamAnsweredRepository extends JpaRepository<ExamAnswer, String
 
     List<ExamAnswer> findByExamHistory_ExamHistoryId(String examHistoryId);
 
-    Optional<ExamAnswer> findByExamHistory_ExamHistoryIdAndQuestion_QuestionId(
+    Optional<ExamAnswer> findByExamHistory_ExamHistoryIdAndQuestionId(
             String examHistoryId,
             String questionId
     );
