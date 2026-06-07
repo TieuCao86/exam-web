@@ -90,4 +90,20 @@ public class StudentController {
 
         return "student/course-detail";
     }
+
+    @GetMapping("/exams/{id}")
+    public String examDetail(
+            @PathVariable String id,
+            Model model) {
+
+        ExamDTO exam = examService.findById(id);
+
+        if (exam == null) {
+            return "redirect:/exams";
+        }
+
+        model.addAttribute("exam", exam);
+
+        return "student/exam-detail";
+    }
 }

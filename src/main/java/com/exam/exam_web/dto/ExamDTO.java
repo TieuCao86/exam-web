@@ -1,5 +1,7 @@
 package com.exam.exam_web.dto;
 
+import com.exam.exam_web.entity.ExamType;
+import com.exam.exam_web.entity.GradingMethod;
 import lombok.*;
 
 import java.io.Serializable;
@@ -24,6 +26,14 @@ public class ExamDTO implements Serializable {
     private LocalDateTime openDate;
     private LocalDateTime closeDate;
     private int durationMinutes;
+
+    private String description;
+
+    private ExamType examType;
+
+    private Integer maxAttempts;
+
+    private GradingMethod gradingMethod;
 
     private String courseId;
     private String courseName;

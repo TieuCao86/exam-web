@@ -30,15 +30,23 @@ public class Exam {
 
     private String password;
 
+    private String description;
+
+    @Enumerated(EnumType.STRING)
+    private ExamType examType;
+
     private int durationMinutes;
 
     private int questionAmount;
 
-    private LocalDateTime openDate;
+    private Integer maxAttempts;
 
+    @Enumerated(EnumType.STRING)
+    private GradingMethod gradingMethod;
+
+    private LocalDateTime openDate;
     private LocalDateTime closeDate;
 
     private LocalDateTime createdAt;
-
     private LocalDateTime updatedAt;
 }

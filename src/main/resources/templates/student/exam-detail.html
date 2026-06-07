@@ -1,0 +1,251 @@
+<th:block th:replace="~{layout/main-layout :: layout(~{:: #exam-detail-content})}">
+
+    <div id="exam-detail-content">
+
+        <div class="page-container">
+
+            <!-- HEADER -->
+            <div class="page-header">
+                <h2 th:text="${exam.examName}">
+                    Chi tiết bài thi
+                </h2>
+            </div>
+
+            <!-- HƯỚNG DẪN -->
+            <div class="content-card">
+
+                <h3>Hướng dẫn</h3>
+
+                <div class="instruction-content"
+                     th:utext="${exam.description}">
+                </div>
+
+            </div>
+
+            <!-- THÔNG TIN CHUNG -->
+            <div class="content-card">
+
+                <div class="detail-grid">
+
+                    <!-- CỘT TRÁI -->
+                    <div>
+
+                        <h3>Thông tin bài thi</h3>
+
+                        <div class="status-row">
+                            <span>Mở từ:</span>
+
+                            <strong th:text="${#temporals.format(exam.openDate,'dd/MM/yyyy HH:mm')}">
+                            </strong>
+                        </div>
+
+                        <div class="status-row">
+                            <span>Đóng lúc:</span>
+
+                            <strong th:text="${#temporals.format(exam.closeDate,'dd/MM/yyyy HH:mm')}">
+                            </strong>
+                        </div>
+
+                    </div>
+
+                    <!-- CỘT PHẢI -->
+                    <div>
+
+                        <!-- FILE UPLOAD -->
+                        <div th:if="${exam.examType != null and exam.examType.name() == 'FILE_UPLOAD'}">
+
+                            <h3>Trạng thái nộp bài</h3>
+
+                            <div class="status-row">
+                                <span>Trạng thái:</span>
+
+                                <strong th:text="${submission != null ? 'Đã nộp' : 'Chưa nộp'}">
+                                    Chưa nộp
+                                </strong>
+                            </div>
+
+                            <div class="status-row">
+                                <span>Điểm:</span>
+
+                                <strong th:text="${submission != null && submission.score != null ? submission.score : 'Chưa chấm'}">
+                                    Chưa chấm
+                                </strong>
+                            </div>
+
+                        </div>
+
+                        <!-- MULTIPLE CHOICE -->
+                        <div th:if="${exam.examType != null and exam.examType.name() == 'MULTIPLE_CHOICE'}">
+
+                            <h3>Thông tin bài kiểm tra</h3>
+
+                            <div class="status-row">
+                                <span>Số lần làm:</span>
+
+                                <strong th:text="${exam.maxAttempts}">
+                                    2
+                                </strong>
+                            </div>
+
+                            <div class="status-row">
+                                <span>Thời gian:</span>
+
+                                <strong th:text="${exam.durationMinutes + ' phút'}">
+                                    50 phút
+                                </strong>
+                            </div>
+
+                            <div class="status-row">
+                                <span>Cách tính điểm:</span>
+
+                                <strong>
+                                    Lần cao nhất
+                                </strong>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- ===================================================== -->
+            <!-- FILE UPLOAD -->
+            <!-- ===================================================== -->
+
+            <div class="content-card"
+                 th:if="${exam.examType != null and exam.examType.name() == 'FILE_UPLOAD'}">
+
+                <h3>Nộp bài</h3>
+
+                <form th:action="@{'/exams/' + ${exam.examId} + '/submit'}"
+                      method="post"
+                      enctype="multipart/form-data">
+
+                    <div class="upload-box">
+
+                        <input type="file"
+                               name="file"
+                               accept=".pdf,.doc,.docx,.zip"
+                               required>
+
+                    </div>
+
+                    <button type="submit"
+                            class="btn-submit">
+
+                        Nộp bài
+
+                    </button>
+
+                </form>
+
+            </div>
+
+            <!-- ===================================================== -->
+            <!-- MULTIPLE CHOICE -->
+            <!-- ===================================================== -->
+
+            <div class="content-card"
+                 th:if="${exam.examType != null and exam.examType.name() == 'MULTIPLE_CHOICE'}">
+
+                <div class="quiz-action">
+
+                    <h3>Bài kiểm tra trắc nghiệm</h3>
+
+                    <a class="btn-submit"
+                       th:href="@{'/exams/' + ${exam.examId} + '/attempt'}">
+
+                        Bắt đầu làm bài
+
+                    </a>
+
+                </div>
+
+            </div>
+
+            <!-- ===================================================== -->
+            <!-- LỊCH SỬ LÀM BÀI -->
+            <!-- ===================================================== -->
+
+            <div class="content-card"
+                 th:if="${exam.examType != null and exam.examType.name() == 'MULTIPLE_CHOICE'}">
+
+                <h3>Tổng quan các lần làm bài trước</h3>
+
+                <table class="attempt-table">
+
+                    <thead>
+                    <tr>
+                        <th>Lần làm</th>
+                        <th>Trạng thái</th>
+                        <th>Điểm</th>
+                        <th>Xem lại</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+
+                    <tr th:if="${attempts == null || #lists.isEmpty(attempts)}">
+
+                        <td colspan="4">
+                            Chưa có lần làm nào
+                        </td>
+
+                    </tr>
+
+                    <tr th:each="attempt : ${attempts}">
+
+                        <td th:text="${attempt.attemptNumber}">
+                            1
+                        </td>
+
+                        <td>
+
+                            <div>
+                                Đã hoàn thành
+                            </div>
+
+                            <small th:text="${#temporals.format(attempt.submittedAt,'dd/MM/yyyy HH:mm')}">
+                            </small>
+
+                        </td>
+
+                        <td th:text="${attempt.score}">
+                            9.0
+                        </td>
+
+                        <td>
+
+                            <a th:href="@{'/attempts/' + ${attempt.attemptId}}">
+                                Xem lại
+                            </a>
+
+                        </td>
+
+                    </tr>
+
+                    </tbody>
+
+                </table>
+
+                <div class="final-score"
+                     th:if="${bestScore != null}">
+
+                    Điểm tổng kết:
+
+                    <strong th:text="${bestScore}">
+                        9.0
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</th:block>
