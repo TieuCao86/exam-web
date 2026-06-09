@@ -1,20 +1,26 @@
 package com.exam.exam_web.services.impl;
 
+import com.exam.exam_web.dto.ExamOptionDTO;
+import com.exam.exam_web.dto.ExamQuestionDTO;
 import com.exam.exam_web.dto.QuestionDTO;
 import com.exam.exam_web.entity.Answer;
 import com.exam.exam_web.entity.Exam;
 import com.exam.exam_web.entity.Question;
 import com.exam.exam_web.entity.Subject;
+import com.exam.exam_web.mapper.AnswerMapper;
 import com.exam.exam_web.mapper.QuestionMapper;
+import com.exam.exam_web.repository.AnswerRepository;
 import com.exam.exam_web.repository.ExamRepository;
 import com.exam.exam_web.repository.QuestionRepository;
 import com.exam.exam_web.repository.SubjectRepository;
 import com.exam.exam_web.services.QuestionService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@RequiredArgsConstructor
 @Service
 public class QuestionServiceImpl implements QuestionService {
 
@@ -22,18 +28,8 @@ public class QuestionServiceImpl implements QuestionService {
     private final ExamRepository examRepository;
     private final SubjectRepository subjectRepository;
     private final QuestionMapper questionMapper;
-
-    public QuestionServiceImpl(
-            QuestionRepository questionRepository,
-            ExamRepository examRepository,
-            SubjectRepository subjectRepository,
-            QuestionMapper questionMapper
-    ) {
-        this.questionRepository = questionRepository;
-        this.examRepository = examRepository;
-        this.subjectRepository = subjectRepository;
-        this.questionMapper = questionMapper;
-    }
+    private final AnswerMapper answerMapper;
+    private final AnswerRepository answerRepository;
 
     // ================= SECURITY =================
 
@@ -133,9 +129,28 @@ public class QuestionServiceImpl implements QuestionService {
 
     @Override
     public List<QuestionDTO> findByExam(String examId) {
-        return questionRepository.findByExamId(examId)
-                .stream()
-                .map(questionMapper::toDTO)
+
+        List<Question> questions =
+                questionRepository.findByExamId(examId);
+
+        return questions.stream()
+                .map(q -> {
+
+                    QuestionDTO dto =
+                            questionMapper.toDTO(q);
+
+                    dto.setAnswers(
+                            answerRepository
+                                    .findByQuestion_QuestionId(
+                                            q.getQuestionId()
+                                    )
+                                    .stream()
+                                    .map(answerMapper::toDTO)
+                                    .toList()
+                    );
+
+                    return dto;
+                })
                 .toList();
     }
 
@@ -146,6 +161,48 @@ public class QuestionServiceImpl implements QuestionService {
                 .stream()
                 .map(questionMapper::toDTO)
                 .toList();
+    }
+
+    @Override
+    public List<ExamQuestionDTO> getExamQuestions(
+            String examId
+    ) {
+
+        List<Question> questions =
+                questionRepository.findByExamId(examId);
+
+        List<ExamQuestionDTO> result =
+                new ArrayList<>();
+
+        int order = 1;
+
+        for (Question question : questions) {
+
+            List<ExamOptionDTO> options =
+                    answerRepository
+                            .findByQuestion_QuestionId(
+                                    question.getQuestionId()
+                            )
+                            .stream()
+                            .map(answer ->
+                                    ExamOptionDTO.builder()
+                                            .answerId(answer.getAnswerId())
+                                            .content(answer.getContent())
+                                            .build()
+                            )
+                            .toList();
+
+            result.add(
+                    ExamQuestionDTO.builder()
+                            .questionId(question.getQuestionId())
+                            .orderInExam(order++)
+                            .content(question.getContent())
+                            .answers(options)
+                            .build()
+            );
+        }
+
+        return result;
     }
 
     private List<Answer> buildAnswers(QuestionDTO dto, Question question) {

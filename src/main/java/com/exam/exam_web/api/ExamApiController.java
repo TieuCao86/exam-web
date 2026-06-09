@@ -1,37 +1,69 @@
 package com.exam.exam_web.api;
 
-import com.exam.exam_web.dto.ExamDTO;
+import com.exam.exam_web.dto.*;
+import com.exam.exam_web.services.ExamHistoryService;
 import com.exam.exam_web.services.ExamService;
+import com.exam.exam_web.services.QuestionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api")
-@CrossOrigin(origins = "http://localhost:5173")
+@RequestMapping("/api/exams")
 @RequiredArgsConstructor
 public class ExamApiController {
 
     private final ExamService examService;
+    private final QuestionService questionService;
+    private final ExamHistoryService examHistoryService;
 
-    @GetMapping("/exams")
+    @GetMapping
     public List<ExamDTO> getAll() {
         return examService.findAll();
     }
 
-    @GetMapping("/available")
-    public List<ExamDTO> getAvailable(@RequestParam String userId) {
-        return examService.findAvailableExams(userId);
+    @GetMapping("/{examId}")
+    public ExamDTO getById(
+            @PathVariable String examId
+    ) {
+        return examService.findById(examId);
     }
 
-    @GetMapping("/upcoming")
-    public List<ExamDTO> getUpcoming(@RequestParam String userId) {
-        return examService.findUpcomingExams(userId);
+    @GetMapping("/{examId}/questions")
+    public List<ExamQuestionDTO> getQuestions(
+            @PathVariable String examId
+    ) {
+        return questionService.getExamQuestions(examId);
     }
 
-    @GetMapping("/expired")
-    public List<ExamDTO> getExpired(@RequestParam String userId) {
-        return examService.findExpiredExams(userId);
+    @PostMapping("/{examId}/start")
+    public ExamAttemptHistoryDTO startExam(
+            @PathVariable String examId,
+            @RequestParam String userId
+    ) {
+        return examHistoryService.startExam(userId, examId);
+    }
+
+    @PostMapping("/{examId}/submit")
+    public ExamAttemptResultDTO submitExam(
+            @PathVariable String examId,
+            @RequestParam String userId,
+            @RequestBody ExamSubmitBody body
+    ) {
+        // Gọi chính xác phương thức theo interface ExamHistoryService của bạn
+        return examHistoryService.submitExam(
+                userId,
+                examId,
+                body.getSelectedIndexes(),
+                body.getElapsedSeconds()
+        );
+    }
+
+    // Class tĩnh lồng bên trong (hoặc DTO riêng biệt) để hứng cấu trúc Body JSON từ Client gửi lên
+    @lombok.Data
+    public static class ExamSubmitBody {
+        private int[] selectedIndexes;
+        private int elapsedSeconds;
     }
 }

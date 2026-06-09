@@ -21,4 +21,16 @@ public interface ExamHistoryRepository extends JpaRepository<ExamHistory, String
         AND h.exam.examId = :examId
     """)
     int getMaxAttemptNumber(String userId, String examId);
+
+    @Query("""
+        SELECT h FROM ExamHistory h 
+        WHERE h.user.userId = :userId 
+        AND h.exam.examId = :examId 
+        AND h.attemptNumber = (
+            SELECT COALESCE(MAX(sub.attemptNumber), 1) 
+            FROM ExamHistory sub 
+            WHERE sub.user.userId = :userId AND sub.exam.examId = :examId
+        )
+    """)
+    java.util.Optional<ExamHistory> findCurrentAttempt(String userId, String examId);
 }

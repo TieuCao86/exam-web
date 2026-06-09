@@ -19,6 +19,4 @@ public class ExamAnsweredDTO implements Serializable {
     private double grade;
     private String questionSnapshot;
     private String answerSnapshot;
-
-    private String courseName;
 }

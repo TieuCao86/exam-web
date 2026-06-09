@@ -9,13 +9,13 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/courses")
 @CrossOrigin(origins = "http://localhost:5173")
 public class CourseApiController {
 
     private final CourseService courseService;
 
-    @GetMapping("/courses")
+    @GetMapping
     public List<CourseDTO> getAll() {
         return courseService.findAll();
     }

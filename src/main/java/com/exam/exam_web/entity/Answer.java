@@ -26,5 +26,6 @@ public class Answer {
     @Column(nullable = false)
     private String content;
 
+    @Column(name = "is_correct", columnDefinition = "TINYINT(1)")
     private boolean isCorrect;
 }

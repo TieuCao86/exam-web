@@ -1,5 +1,6 @@
 package com.exam.exam_web.services.impl;
 
+import com.exam.exam_web.dto.ExamAnswerReviewDTO;
 import com.exam.exam_web.dto.ExamAttemptHistoryDTO;
 import com.exam.exam_web.dto.ExamAttemptResultDTO;
 import com.exam.exam_web.dto.ExamHistorySummaryDTO;
@@ -14,6 +15,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional; // Đã thêm import này
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -24,11 +27,14 @@ public class ExamHistoryServiceImpl implements ExamHistoryService {
     private final ExamRepository examRepository;
     private final AnswerRepository answerRepository;
     private final QuestionRepository questionRepository;
+    private final ExamHistoryRepository examHistoryRepository;
+    private final ExamAnswerRepository examAnswerRepository;
+    private final ExamQuestionRepository examQuestionRepository;
 
     private final ExamHistorySummaryMapper summaryMapper;
     private final ExamAttemptHistoryMapper attemptHistoryMapper;
     private final ExamAttemptResultMapper attemptResultMapper;
-    private final ExamHistoryRepository examHistoryRepository;
+    private final ExamAttemptHistoryMapper examAttemptHistoryMapper;
 
     @Override
     public List<ExamHistorySummaryDTO> findHistoryByUser(String userId) {
@@ -91,53 +97,115 @@ public class ExamHistoryServiceImpl implements ExamHistoryService {
     }
 
     @Override
+    @Transactional
     public ExamAttemptResultDTO submitExam(String userId, String examId, int[] selectedIndexes, int elapsedSeconds) {
-        int attempt = getMaxAttemptNumber(userId, examId) + 1;
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        ExamHistory history = examHistoryRepository.findCurrentAttempt(userId, examId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy lượt làm bài hợp lệ cho sinh viên này"));
 
-        Exam exam = examRepository.findById(examId)
-                .orElseThrow(() -> new RuntimeException("Exam not found"));
+        // 2. Lấy danh sách câu hỏi của đề thi này theo đúng thứ tự orderIndex
+        List<ExamQuestion> examQuestions = examQuestionRepository.findByExamExamIdOrderByOrderIndexAsc(examId);
 
-        ExamHistory history = new ExamHistory();
-        history.setUser(user);
-        history.setExam(exam);
-        history.setAttemptNumber(attempt);
+        int totalQuestions = history.getExam().getQuestionAmount();
+        int correctAnswersCount = 0;
+        List<ExamAnswerReviewDTO> reviewList = new ArrayList<>();
+
+        // 3. Duyệt qua từng câu hỏi trong đề để đối chiếu với mảng câu trả lời selectedIndexes
+        for (int i = 0; i < examQuestions.size(); i++) {
+            ExamQuestion eq = examQuestions.get(i);
+            Question question = eq.getQuestion();
+            List<Answer> answers = question.getAnswers();
+
+            int chosenIndex = (selectedIndexes != null && i < selectedIndexes.length) ? selectedIndexes[i] : -1;
+
+            Answer selectedAnswer = null;
+            boolean isCorrect = false;
+            double questionGrade = 0.0;
+
+            if (chosenIndex >= 0 && chosenIndex < answers.size()) {
+                selectedAnswer = answers.get(chosenIndex);
+                if (selectedAnswer.isCorrect()) {
+                    isCorrect = true;
+                    correctAnswersCount++;
+                    questionGrade = 10.0 / totalQuestions;
+                }
+            }
+
+            String correctAnswerText = answers.stream()
+                    .filter(Answer::isCorrect)
+                    .map(Answer::getContent)
+                    .findFirst()
+                    .orElse("");
+
+            ExamAnswer examAnswer = ExamAnswer.builder()
+                    .examHistory(history)
+                    .questionId(question.getQuestionId())
+                    .correct(isCorrect)
+                    .grade(questionGrade)
+                    .questionSnapshot(question.getContent())
+                    .selectedAnswerSnapshot(selectedAnswer != null ? selectedAnswer.getContent() : "Không trả lời")
+                    // Đã loại bỏ hoàn toàn .orderIndex(...) hay .orderInExam(...) tại đây
+                    .build();
+            examAnswerRepository.save(examAnswer);
+
+            // 5. Thêm thông tin vào danh sách trả về hiển thị kết quả (Dùng thuộc tính của DTO của bạn)
+            ExamAnswerReviewDTO review = ExamAnswerReviewDTO.builder()
+                    .orderInExam(i + 1) // DTO có trường này nên giữ nguyên để hiển thị ra giao diện
+                    .questionContent(question.getContent())
+                    .selectedAnswer(selectedAnswer != null ? selectedAnswer.getContent() : "Không trả lời")
+                    .correctAnswer(correctAnswerText)
+                    .correct(isCorrect)
+                    .grade(questionGrade)
+                    .build();
+            reviewList.add(review);
+        }
+
+        // 6. Tính toán điểm số tổng hợp và làm tròn đến 2 chữ số thập phân
+        double finalScore = ((double) correctAnswersCount / totalQuestions) * 10;
+        finalScore = Math.round(finalScore * 100.0) / 100.0;
+
+        // 7. Cập nhật lại bản ghi lịch sử thi
+        history.setScore(finalScore);
         history.setElapsedSeconds(elapsedSeconds);
         history.setSubmittedAt(LocalDateTime.now());
+        examHistoryRepository.save(history);
 
-        double score = calculateScore(examId, selectedIndexes);
-        history.setScore(score);
-
-        ExamHistory saved = examHistoryRepository.save(history);
-        return attemptResultMapper.toDTO(saved);
+        // 8. Trả về thông tin đầy đủ kết quả chấm điểm
+        return ExamAttemptResultDTO.builder()
+                .examHistoryId(history.getExamHistoryId())
+                .examName(history.getExam().getExamName())
+                .attemptNumber(history.getAttemptNumber())
+                .score(finalScore)
+                .elapsedSeconds(elapsedSeconds)
+                .submittedAt(history.getSubmittedAt())
+                .totalQuestions(totalQuestions)
+                .correctAnswers(correctAnswersCount)
+                .answers(reviewList)
+                .build();
     }
 
     // ================= START EXAM FIXES =================
     @Override
-    @Transactional
-    public String startExam(String userId, String examId) {
+    public ExamAttemptHistoryDTO startExam(String userId, String examId) {
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+
         Exam exam = examRepository.findById(examId)
                 .orElseThrow(() -> new RuntimeException("Exam not found"));
 
-        // Dùng luôn hàm getMaxAttemptNumber có sẵn của bạn để tránh lỗi thiếu method trong repo
-        int currentAttempts = getMaxAttemptNumber(userId, examId);
-        int nextAttempt = currentAttempts + 1;
+        int nextAttempt = getMaxAttemptNumber(userId, examId) + 1;
 
-        ExamHistory history = ExamHistory.builder()
-                .user(user)
-                .exam(exam)
-                .attemptNumber(nextAttempt)
-                .score(0.0)
-                .elapsedSeconds(0)
-                .submittedAt(null)
-                .build();
+        ExamHistory history = new ExamHistory();
+        history.setUser(user);
+        history.setExam(exam);
+        history.setAttemptNumber(nextAttempt);
+        history.setSubmittedAt(null);
+        history.setScore(0.0);
 
-        ExamHistory savedHistory = examHistoryRepository.save(history);
-        return savedHistory.getExamHistoryId();
+        ExamHistory saved = examHistoryRepository.save(history);
+
+        return examAttemptHistoryMapper.toDTO(saved);
     }
 
     private double calculateScore(String examId, int[] selectedAnswerIndexes) {

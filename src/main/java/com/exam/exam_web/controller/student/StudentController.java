@@ -123,24 +123,24 @@ public class StudentController {
         return "student/exam-detail";
     }
 
-    @GetMapping("/exams/{id}/start")
-    public String startExam(@PathVariable String id, Model model) {
-
-        String userId = getUserId();
-
-        ExamDTO exam = examService.findById(id);
-
-        if (exam == null) {
-            return "redirect:/exams";
-        }
-
-        String historyId = examHistoryService.startExam(userId, id);
-
-        model.addAttribute("exam", exam);
-        model.addAttribute("historyId", historyId);
-
-        return "student/exam-take";
-    }
+//    @GetMapping("/exams/{id}/start")
+//    public String startExam(@PathVariable String id, Model model) {
+//
+//        String userId = getUserId();
+//
+//        ExamDTO exam = examService.findById(id);
+//
+//        if (exam == null) {
+//            return "redirect:/exams";
+//        }
+//
+//        String historyId = examHistoryService.startExam(userId, id);
+//
+//        model.addAttribute("exam", exam);
+//        model.addAttribute("historyId", historyId);
+//
+//        return "student/exam-take";
+//    }
 
     // ===================== HISTORY LIST =====================
     @GetMapping("/history")

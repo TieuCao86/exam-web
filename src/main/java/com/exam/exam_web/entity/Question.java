@@ -28,4 +28,10 @@ public class Question {
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
+
+    @OneToMany(
+            mappedBy = "question",
+            fetch = FetchType.LAZY
+    )
+    private List<Answer> answers = new ArrayList<>();
 }

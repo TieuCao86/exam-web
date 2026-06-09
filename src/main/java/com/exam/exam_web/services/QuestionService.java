@@ -1,5 +1,6 @@
 package com.exam.exam_web.services;
 
+import com.exam.exam_web.dto.ExamQuestionDTO;
 import com.exam.exam_web.dto.QuestionDTO;
 
 import java.util.List;
@@ -38,5 +39,11 @@ public interface QuestionService {
 
     List<QuestionDTO> findBySubject(
             String subjectId
+    );
+
+    // ===== EXAM TAKING =====
+
+    List<ExamQuestionDTO> getExamQuestions(
+            String examId
     );
 }

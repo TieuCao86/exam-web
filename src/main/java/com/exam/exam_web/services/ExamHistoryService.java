@@ -34,5 +34,6 @@ public interface ExamHistoryService {
             int elapsedSeconds
     );
 
-    String startExam(String userId, String examId);
+    ExamAttemptHistoryDTO startExam(String userId, String examId);
+
 }

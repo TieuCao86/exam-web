@@ -9,6 +9,7 @@ import org.mapstruct.Mapping;
 public interface AnswerMapper {
 
     @Mapping(source = "question.questionId", target = "questionId")
+    @Mapping(source = "correct", target = "isCorrect")
     AnswerDTO toDTO(Answer answer);
 
     @Mapping(source = "questionId", target = "question.questionId")
