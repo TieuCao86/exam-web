@@ -76,4 +76,6 @@ public interface ExamService {
     List<ExamDTO> findAllByTeacherId(
             String teacherId
     );
+
+    boolean verifyPassword(String examId, String password);
 }

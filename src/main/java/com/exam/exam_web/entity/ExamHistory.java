@@ -3,6 +3,7 @@ package com.exam.exam_web.entity;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -37,4 +38,11 @@ public class ExamHistory {
     private String snapshotId;
 
     private LocalDateTime submittedAt;
+
+    @CreationTimestamp // Tự động ghi nhận mốc thời gian hệ thống khi sinh viên bấm Start bài thi
+    @Column(updatable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "cheat_count", nullable = false)
+    private int cheatCount = 0;
 }

@@ -1,39 +1,24 @@
 package com.exam.exam_web.services.impl;
 
 import com.exam.exam_web.dto.ExamDTO;
-import com.exam.exam_web.entity.Course;
 import com.exam.exam_web.entity.Exam;
-import com.exam.exam_web.entity.Subject;
-import com.exam.exam_web.entity.User;
 import com.exam.exam_web.mapper.ExamMapper;
 import com.exam.exam_web.repository.CourseRepository;
 import com.exam.exam_web.repository.ExamRepository;
-import com.exam.exam_web.repository.SubjectRepository;
 import com.exam.exam_web.services.ExamService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
+@RequiredArgsConstructor
 @Service
 public class ExamServiceImpl implements ExamService {
 
     private final ExamRepository examRepository;
-    private final SubjectRepository subjectRepository;
     private final CourseRepository courseRepository;
     private final ExamMapper examMapper;
-
-    public ExamServiceImpl(
-            ExamRepository examRepository,
-            SubjectRepository subjectRepository,
-            CourseRepository courseRepository,
-            ExamMapper examMapper
-    ) {
-        this.examRepository = examRepository;
-        this.subjectRepository = subjectRepository;
-        this.courseRepository = courseRepository;
-        this.examMapper = examMapper;
-    }
 
     // ================= CRUD =================
 
@@ -181,6 +166,24 @@ public class ExamServiceImpl implements ExamService {
     @Override
     public List<ExamDTO> findAllByTeacherId(String teacherId) {
         return List.of();
+    }
+
+    // ================= PASSWORD VERIFICATION =================
+
+    @Override
+    public boolean verifyPassword(String examId, String password) {
+        // 1. Tìm thông tin đề thi trong Database
+        Exam exam = examRepository.findById(examId)
+                .orElseThrow(() -> new RuntimeException("Exam not found"));
+
+        // 2. Nếu cấu hình đề thi KHÔNG CÓ mật khẩu (null hoặc rỗng) -> Coi như hợp lệ luôn
+        if (exam.getPassword() == null || exam.getPassword().trim().isEmpty()) {
+            return true;
+        }
+
+        // 3. Nếu đề có mật khẩu, tiến hành so sánh chính xác chuỗi ký tự nhận được
+        // (Nếu sau này bạn dùng BCrypt mã hóa mật khẩu đề thi, hãy đổi sang passwordEncoder.matches tại đây)
+        return exam.getPassword().equals(password);
     }
 
     // ================= HELPER =================
