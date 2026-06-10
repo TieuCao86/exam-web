@@ -231,6 +231,14 @@ public class ExamHistoryServiceImpl implements ExamHistoryService {
                 .build();
     }
 
+    @Override
+    public List<ExamAttemptHistoryDTO> findByExamId(String examId) {
+        return examHistoryRepository.findByExam_ExamId(examId)
+                .stream()
+                .map(attemptHistoryMapper::toDTO)
+                .toList();
+    }
+
     // ================= START EXAM FIXES =================
     @Override
     public ExamAttemptHistoryDTO startExam(String userId, String examId) {

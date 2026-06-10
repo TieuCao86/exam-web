@@ -1,0 +1,81 @@
+package com.exam.exam_web.api;
+
+import com.exam.exam_web.dto.ExamDTO;
+import com.exam.exam_web.dto.ExamAttemptHistoryDTO;
+import com.exam.exam_web.services.ExamHistoryService;
+import com.exam.exam_web.services.ExamService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/teacher/exams")
+@RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:5173")
+public class ExamTeacherApiController {
+
+    private final ExamService examService;
+    private final ExamHistoryService examHistoryService;
+
+    // =====================================================================
+    // 1. QUẢN LÝ CẤU HÌNH ĐỀ THI (CRUD)
+    // =====================================================================
+
+    // Lấy danh sách tất cả đề thi do Giáo viên này quản lý/tạo ra
+    @GetMapping
+    public List<ExamDTO> getExamsByTeacher(@RequestParam String teacherId) {
+        return examService.findAllByTeacherId(teacherId);
+    }
+
+    // Xem chi tiết cấu hình (kèm mật khẩu) của một đề thi cụ thể
+    @GetMapping("/{examId}")
+    public ResponseEntity<ExamDTO> getExamDetail(@PathVariable String examId) {
+        ExamDTO dto = examService.findById(examId);
+        return dto != null ? ResponseEntity.ok(dto) : ResponseEntity.notFound().build();
+    }
+
+    // Tạo mới một đề thi (Cấu hình thời gian, mật khẩu, số câu hỏi, cách tính điểm)
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public ExamDTO createExam(@RequestBody ExamDTO dto) {
+        return examService.createExam(dto);
+    }
+
+    // Cập nhật cấu hình đề thi (Gia hạn thời gian đóng/mở đề, đổi mật khẩu)
+    @PutMapping("/{examId}")
+    public ExamDTO updateExam(@PathVariable String examId, @RequestBody ExamDTO dto) {
+        dto.setExamId(examId);
+        return examService.updateExam(dto);
+    }
+
+    // Xóa đề thi khỏi hệ thống
+    @DeleteMapping("/{examId}")
+    public ResponseEntity<Void> deleteExam(@PathVariable String examId) {
+        boolean isDeleted = examService.deleteExam(examId);
+        return isDeleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+    }
+
+    // Gán một đề thi có sẵn vào một Khóa học/Lớp học cụ thể
+    @PostMapping("/{examId}/assign-course")
+    public ResponseEntity<Void> assignToCourse(
+            @PathVariable String examId,
+            @RequestParam String courseId
+    ) {
+        examService.assignCourse(examId, courseId);
+        return ResponseEntity.ok().build();
+    }
+
+    // =====================================================================
+    // 2. GIÁM SÁT VÀ QUẢN LÝ KẾT QUẢ THI CỦA SINH VIÊN
+    // =====================================================================
+
+    // Lấy danh sách toàn bộ bài làm, điểm số của tất cả sinh viên thuộc một đề thi (Bảng điểm của lớp)
+    @GetMapping("/{examId}/submissions")
+    public List<ExamAttemptHistoryDTO> getStudentSubmissions(@PathVariable String examId) {
+        // Hàm này gọi xuống repository tìm tất cả exam_histories có cùng examId
+        return examHistoryService.findByExamId(examId);
+    }
+}

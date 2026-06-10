@@ -35,6 +35,9 @@ public interface ExamHistoryService {
             int elapsedSeconds
     );
 
+    // Thêm kiểu import nếu cần: import com.exam.exam_web.dto.ExamAttemptHistoryDTO;
+    List<ExamAttemptHistoryDTO> findByExamId(String examId);
+
     // Bắt đầu làm bài (Ghi nhận mốc thời gian bắt đầu)
     ExamAttemptHistoryDTO startExam(String userId, String examId);
 
