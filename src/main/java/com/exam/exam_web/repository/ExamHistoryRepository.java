@@ -1,5 +1,6 @@
 package com.exam.exam_web.repository;
 
+import com.exam.exam_web.dto.TeacherSubmissionDTO;
 import com.exam.exam_web.entity.ExamHistory;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -37,4 +38,23 @@ public interface ExamHistoryRepository extends JpaRepository<ExamHistory, String
         )
     """)
     Optional<ExamHistory> findCurrentAttempt(@Param("userId") String userId, @Param("examId") String examId);
+
+    @Query("""
+        SELECT new com.exam.exam_web.dto.TeacherSubmissionDTO(
+            h.examHistoryId, 
+            h.attemptNumber, 
+            h.score, 
+            h.elapsedSeconds, 
+            h.submittedAt,
+            u.userId,
+            a.username,
+            a.email
+        )
+        FROM ExamHistory h
+        JOIN h.user u
+        JOIN u.account a
+        WHERE h.exam.examId = :examId
+        ORDER BY h.submittedAt DESC, h.attemptNumber ASC
+    """)
+    List<TeacherSubmissionDTO> findSubmissionsByExamId(@Param("examId") String examId);
 }

@@ -6,45 +6,25 @@ import java.util.List;
 
 public interface CourseService {
 
-    CourseDTO create(
-            CourseDTO dto
-    );
+    CourseDTO create(CourseDTO dto);
 
-    CourseDTO update(
-            CourseDTO dto
-    );
+    CourseDTO update(CourseDTO dto);
 
-    boolean delete(
-            String courseId
-    );
+    boolean delete(String courseId);
 
     List<CourseDTO> findAll();
 
-    CourseDTO findById(
-            String courseId
-    );
+    CourseDTO findById(String courseId);
 
-    List<CourseDTO> findByTeacher(
-            String teacherId
-    );
+    List<CourseDTO> findByTeacher(String teacherId);
 
-    List<CourseDTO> findByUser(
-            String userId
-    );
+    List<CourseDTO> findByUser(String userId);
 
-    CourseDTO getCourseByExamId(
-            String examId
-    );
+    CourseDTO getCourseByExamId(String examId);
 
-    CourseDTO assignTeacher(
-            String courseId,
-            String teacherId
-    );
+    CourseDTO assignTeacher(String courseId, String teacherId);
 
-    List<CourseDTO> findByFilter(
-            String semester,
-            String academicYear
-    );
+    List<CourseDTO> findByFilter(String semester, String academicYear);
 
     List<CourseDTO> search(
             String keyword,

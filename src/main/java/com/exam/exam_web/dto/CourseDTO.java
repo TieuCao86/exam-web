@@ -19,7 +19,7 @@ public class CourseDTO implements Serializable {
     private LocalDateTime startDate;
     private String academicYear;
     private String semester;
-    private double progress;
+    private Double progress;
     private String imageUrl;
 
     private String subjectId;

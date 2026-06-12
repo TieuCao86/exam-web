@@ -1,7 +1,7 @@
-package com.exam.exam_web.api;
+package com.exam.exam_web.api.teacher;
 
 import com.exam.exam_web.dto.ExamDTO;
-import com.exam.exam_web.dto.ExamAttemptHistoryDTO;
+import com.exam.exam_web.dto.TeacherSubmissionDTO;
 import com.exam.exam_web.services.ExamHistoryService;
 import com.exam.exam_web.services.ExamService;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +15,7 @@ import java.util.List;
 @RequestMapping("/api/teacher/exams")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "http://localhost:5173")
-public class ExamTeacherApiController {
+public class TeacherExamController {
 
     private final ExamService examService;
     private final ExamHistoryService examHistoryService;
@@ -58,7 +58,7 @@ public class ExamTeacherApiController {
         return isDeleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
     }
 
-    // Gán một đề thi có sẵn vào một Khóa học/Lớp học cụ thể
+    // Gán một đề thi có sẵn vào một Khóa học/Lớp học cụ thể mà Admin đã mở
     @PostMapping("/{examId}/assign-course")
     public ResponseEntity<Void> assignToCourse(
             @PathVariable String examId,
@@ -73,9 +73,10 @@ public class ExamTeacherApiController {
     // =====================================================================
 
     // Lấy danh sách toàn bộ bài làm, điểm số của tất cả sinh viên thuộc một đề thi (Bảng điểm của lớp)
+    // URL Postman chuẩn: GET http://localhost:8080/api/teacher/exams/{examId}/submissions
     @GetMapping("/{examId}/submissions")
-    public List<ExamAttemptHistoryDTO> getStudentSubmissions(@PathVariable String examId) {
-        // Hàm này gọi xuống repository tìm tất cả exam_histories có cùng examId
-        return examHistoryService.findByExamId(examId);
+    public ResponseEntity<List<TeacherSubmissionDTO>> getSubmissionsByExam(@PathVariable("examId") String examId) {
+        List<TeacherSubmissionDTO> submissions = examHistoryService.getSubmissionsByExamId(examId);
+        return ResponseEntity.ok(submissions);
     }
 }

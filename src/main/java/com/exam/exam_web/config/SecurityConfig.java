@@ -15,45 +15,52 @@ public class SecurityConfig {
             throws Exception {
 
         http
-                .csrf(csrf -> csrf.disable())
+                .csrf(csrf -> csrf.disable()) // Tắt CSRF để test API qua Postman mượt mà
 
                 .authorizeHttpRequests(auth -> auth
-
+                        // 1. MỞ KHÓA CHO TẤT CẢ TÀI NGUYÊN TĨNH VÀ TRANG LOGIN
                         .requestMatchers(
                                 "/login",
                                 "/css/**",
                                 "/js/**",
-                                "/images/**",
-                                "/calendar/**",
-                                "/courses/**",
-                                "/exams/**",
-                                "/api/**",
-                                "/history/**"
-
+                                "/images/**"
                         ).permitAll()
 
-                        .requestMatchers("/students/**")
-                        .hasRole("ADMIN")
+                        // 2. PHÂN QUYỀN RIÊNG CHO CÁC ĐƯỜNG DẪN REST API (/api/**)
+                        // Cho phép sinh viên/mọi người gọi các API chung (xem đề, xem khóa học)
+                        .requestMatchers(
+                                "/api/exams/**",
+                                "/api/courses/**"
+                        ).permitAll()
 
-                        .requestMatchers("/questions/**")
-                        .hasRole("TEACHER")
+                        // BẮT BUỘC các API nằm trong gói /api/teacher/** phải có quyền TEACHER hoặc ADMIN
+                        // (Thêm dòng này giúp Postman không bị lọt xuống formLogin)
+                        .requestMatchers("/api/teacher/**").hasAnyRole("TEACHER", "ADMIN")
 
-                        .requestMatchers("/calendar/**")
-                        .hasRole("STUDENT")
+                        // Các API chung khác nếu có
+                        .requestMatchers("/api/**").permitAll()
 
-                        .anyRequest()
-                        .authenticated()
+                        // 3. PHÂN QUYỀN CHO CÁC TRANG GIAO DIỆN (VIEW - MVC WEB)
+                        .requestMatchers("/students/**").hasRole("ADMIN")
+                        .requestMatchers("/questions/**").hasRole("TEACHER")
+                        .requestMatchers("/calendar/**").hasRole("STUDENT")
+                        .requestMatchers("/courses/**", "/exams/**", "/history/**").authenticated()
+
+                        // Tất cả các yêu cầu còn lại đều phải đăng nhập
+                        .anyRequest().authenticated()
                 )
 
+                // CẤU HÌNH ĐĂNG NHẬP GIAO DIỆN (Cho trình duyệt)
                 .formLogin(form -> form
                         .loginPage("/login")
                         .usernameParameter("username")
                         .passwordParameter("password")
-                        .successHandler(new RoleBasedSuccessHandler())
+                         .successHandler(new RoleBasedSuccessHandler()) // Tạm thời comment dòng này khi test bằng Postman nếu nó gây loop
                         .failureUrl("/login?error")
                         .permitAll()
                 )
 
+                // CẤU HÌNH ĐĂNG XUẤT
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/login")

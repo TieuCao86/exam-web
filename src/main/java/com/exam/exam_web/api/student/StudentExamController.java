@@ -1,4 +1,4 @@
-package com.exam.exam_web.api;
+package com.exam.exam_web.api.student;
 
 import com.exam.exam_web.dto.*;
 import com.exam.exam_web.services.ExamHistoryService;
@@ -11,80 +11,69 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/exams")
+@RequestMapping("/api/student/exams")
 @RequiredArgsConstructor
-public class ExamApiController {
+@CrossOrigin(origins = "http://localhost:5173")
+public class StudentExamController {
 
     private final ExamService examService;
     private final QuestionService questionService;
     private final ExamHistoryService examHistoryService;
 
-    // 1. Lấy danh sách tất cả đề thi hiển thị ở trang chủ Student
-    @GetMapping
-    public List<ExamDTO> getAll() {
-        return examService.findAll();
-    }
-
-    // 2. Xem cấu hình tổng quan của một đề thi cụ thể
+    // Xem cấu hình tổng quan của một đề thi trước khi bấm vào thi
     @GetMapping("/{examId}")
     public ExamDTO getById(@PathVariable String examId) {
         return examService.findById(examId);
     }
 
-    // 2.1 API Xác thực mật khẩu đề thi (Dành cho các đề thi bảo mật tại phòng máy)
+    // Xác thực mật khẩu phòng máy
     @PostMapping("/{examId}/verify-password")
     public ResponseEntity<Boolean> verifyExamPassword(
             @PathVariable String examId,
-            @RequestParam String password
-    ) {
-        // Hãy triển khai hàm verifyPassword trong examService (so sánh password gửi lên với DB)
-        boolean isValid = examService.verifyPassword(examId, password);
-        return ResponseEntity.ok(isValid);
+            @RequestParam String password) {
+        return ResponseEntity.ok(examService.verifyPassword(examId, password));
     }
 
-    // 3. API kiểm tra điều kiện trước khi bấm nút vào thi (Tránh gian lận/quá lượt)
+    // Kiểm tra điều kiện (Check số lượt làm bài, thời gian mở đề)
     @GetMapping("/{examId}/check-eligibility")
     public ResponseEntity<Boolean> checkEligibility(
             @PathVariable String examId,
-            @RequestParam String userId
-    ) {
+            @RequestParam String userId) {
         return ResponseEntity.ok(examHistoryService.checkEligibility(userId, examId));
     }
 
-    // 4. Lấy danh sách câu hỏi an toàn (đã giấu isCorrect) để sinh viên làm bài
+    // Lấy đề thi an toàn (Ẩn đáp án đúng) để hiển thị lên màn hình làm bài
     @GetMapping("/{examId}/questions")
     public List<ExamQuestionDTO> getQuestions(@PathVariable String examId) {
         return questionService.getExamQuestions(examId);
     }
 
-    // 5. API đồng bộ thời gian: Tính số giây còn lại thực tế khi FE lỡ tay F5/sập nguồn
+    // Đồng bộ thời gian thực tế đề phòng sập nguồn, F5 rời tab
     @GetMapping("/{examId}/time-left")
     public int getRemainingSeconds(
             @PathVariable String examId,
-            @RequestParam String userId
-    ) {
+            @RequestParam String userId) {
         return examHistoryService.getRemainingSeconds(userId, examId);
     }
 
-    // 6. Bắt đầu làm bài (Ghi nhận mốc thời gian createdAt vào DB)
+    // Sinh viên bấm Start (Hệ thống ghi nhận mốc thời gian bắt đầu)
     @PostMapping("/{examId}/start")
     public ExamAttemptHistoryDTO startExam(
             @PathVariable String examId,
-            @RequestParam String userId
-    ) {
+            @RequestParam String userId) {
         return examHistoryService.startExam(userId, examId);
     }
 
-    // 7. API báo cáo vi phạm khi sinh viên thoát chế độ Toàn màn hình (Full Screen) hoặc rời Tab
+    // Ghi nhận hành vi gian lận (Rời tab/Thoát toàn màn hình)
     @PostMapping("/{examId}/cheat-report")
     public void reportCheat(
             @PathVariable String examId,
-            @RequestParam String userId
-    ) {
+            @RequestParam String userId) {
         examHistoryService.increaseCheatCount(userId, examId);
     }
 
-    // 8. Nộp bài và chấm điểm thực tế tại Server
+    // Bấm nộp bài (Hệ thống tự động chấm điểm trên Server và trả kết quả lập tức)
+    // 8. Nộp bài và chấm điểm thực tế tại Server dựa trên questionId và answerId
     @PostMapping("/{examId}/submit")
     public ExamAttemptResultDTO submitExam(
             @PathVariable String examId,
@@ -92,39 +81,35 @@ public class ExamApiController {
             @RequestBody ExamSubmitBody body
     ) {
         return examHistoryService.submitExam(
-                userId,
                 examId,
-                body.getSelectedIndexes(),
-                body.getElapsedSeconds()
+                userId,
+                body
         );
     }
 
-    // 9. Lấy danh sách tóm tắt lịch sử thi (Gom nhóm theo đề, tính điểm cao nhất)
+    // Xem danh sách tóm tắt lịch sử thi ở trang cá nhân của Sinh viên
     @GetMapping("/history")
     public List<ExamHistorySummaryDTO> getStudentHistory(@RequestParam String userId) {
         return examHistoryService.findHistoryByUser(userId);
     }
 
-    // 9.1 API lấy chi tiết các LƯỢT THI của một đề cụ thể (Ví dụ: Lượt 1, Lượt 2, Lượt 3)
+    // Xem chi tiết các lượt làm bài của một đề (Lần 1, Lần 2...)
     @GetMapping("/{examId}/attempts")
     public List<ExamAttemptHistoryDTO> getExamAttempts(
             @PathVariable String examId,
-            @RequestParam String userId
-    ) {
-        // Gọi chính xác hàm đã có sẵn trong ExamHistoryService của bạn
+            @RequestParam String userId) {
         return examHistoryService.findAttempts(userId, examId);
     }
 
-    // 10. Xem lại chi tiết từng câu đúng/sai của một bài làm cũ (Trang Review)
+    // Xem lại bài làm cũ (Trang Review xem câu nào đúng, câu nào sai)
     @GetMapping("/history/{examHistoryId}/review")
     public ExamAttemptResultDTO reviewExamAttempt(@PathVariable String examHistoryId) {
         return examHistoryService.findAttemptResult(examHistoryId);
     }
 
-    // Class tĩnh lồng bên trong để hứng cấu trúc Body JSON từ Client gửi lên
     @lombok.Data
     public static class ExamSubmitBody {
-        private int[] selectedIndexes;
         private int elapsedSeconds;
+        private List<AnswerSelectionDTO> userAnswers;
     }
 }

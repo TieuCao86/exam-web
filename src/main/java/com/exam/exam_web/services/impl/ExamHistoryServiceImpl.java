@@ -1,9 +1,7 @@
 package com.exam.exam_web.services.impl;
 
-import com.exam.exam_web.dto.ExamAnswerReviewDTO;
-import com.exam.exam_web.dto.ExamAttemptHistoryDTO;
-import com.exam.exam_web.dto.ExamAttemptResultDTO;
-import com.exam.exam_web.dto.ExamHistorySummaryDTO;
+import com.exam.exam_web.api.student.StudentExamController;
+import com.exam.exam_web.dto.*;
 import com.exam.exam_web.entity.*;
 import com.exam.exam_web.mapper.ExamAttemptHistoryMapper;
 import com.exam.exam_web.mapper.ExamAttemptResultMapper;
@@ -16,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional; // Đã thêm i
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -80,12 +77,13 @@ public class ExamHistoryServiceImpl implements ExamHistoryService {
     }
 
     @Override
+    @Transactional(readOnly = true) // Thêm readOnly để tối ưu hóa tốc độ đọc dữ liệu của Hibernate
     public ExamAttemptResultDTO findAttemptResult(String examHistoryId) {
         // 1. Tìm bản ghi lịch sử gốc
         ExamHistory history = examHistoryRepository.findById(examHistoryId)
                 .orElseThrow(() -> new RuntimeException("History not found"));
 
-        // 2. Chạy qua Mapper của bạn để lấy khung DTO cơ bản (Lúc này answers và correctAnswers vẫn đang null)
+        // 2. Chạy qua Mapper lấy khung DTO cơ bản
         ExamAttemptResultDTO dto = attemptResultMapper.toDTO(history);
 
         // 3. Chủ động bốc danh sách câu trả lời chi tiết từ bảng exam_answers lên
@@ -94,18 +92,22 @@ public class ExamHistoryServiceImpl implements ExamHistoryService {
         // 4. Đếm số câu đúng thực tế từ DB
         int correctAnswersCount = (int) examAnswers.stream().filter(ExamAnswer::isCorrect).count();
 
-        // 5. Ánh xạ danh sách ExamAnswer sang ExamAnswerReviewDTO cho Front-end hiển thị
-        List<ExamAnswerReviewDTO> reviewList = examAnswers.stream().map(ea ->
-                ExamAnswerReviewDTO.builder()
-                        .orderInExam(examAnswers.indexOf(ea) + 1) // Hoặc trường thứ tự nếu bạn có lưu
-                        .questionContent(ea.getQuestionSnapshot())
-                        .selectedAnswer(ea.getSelectedAnswerSnapshot())
-                        .correct(ea.isCorrect())
-                        .grade(ea.getGrade())
-                        // Vì ta lưu snapshot câu trả lời của học sinh, nếu sai có thể hiển thị câu chữ thông báo
-                        .correctAnswer(ea.isCorrect() ? ea.getSelectedAnswerSnapshot() : "Mời xem lại tài liệu")
-                        .build()
-        ).toList();
+        // 5. Ánh xạ danh sách sang DTO bằng vòng lặp thông thường
+        List<ExamAnswerReviewDTO> reviewList = new ArrayList<>();
+        int index = 1; // Biến đếm số nguyên thuần túy
+
+        for (ExamAnswer ea : examAnswers) {
+            ExamAnswerReviewDTO review = ExamAnswerReviewDTO.builder()
+                    .orderInExam(index++) // Gán xong tự động tăng lên 1
+                    .questionContent(ea.getQuestionSnapshot())
+                    .selectedAnswer(ea.getSelectedAnswerSnapshot())
+                    .correct(ea.isCorrect())
+                    .grade(ea.getGrade())
+                    .correctAnswer(ea.isCorrect() ? ea.getSelectedAnswerSnapshot() : "Mời xem lại tài liệu")
+                    .build();
+
+            reviewList.add(review);
+        }
 
         // 6. Đập dữ liệu vừa tính toán vào DTO trước khi trả về
         dto.setCorrectAnswers(correctAnswersCount);
@@ -126,109 +128,61 @@ public class ExamHistoryServiceImpl implements ExamHistoryService {
 
     @Override
     @Transactional
-    public ExamAttemptResultDTO submitExam(String userId, String examId, int[] selectedIndexes, int elapsedSeconds) {
-
+    public ExamAttemptResultDTO submitExam(String examId, String userId, StudentExamController.ExamSubmitBody body) {
         ExamHistory history = examHistoryRepository.findCurrentAttempt(userId, examId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy lượt làm bài hợp lệ cho sinh viên này"));
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy lượt làm bài nào đang diễn ra (chưa nộp) cho đề thi này!"));
 
-        LocalDateTime now = LocalDateTime.now();
-        // Bọc lót nếu trường createdAt của dữ liệu cũ bị null, tránh lỗi sập hệ thống
-        LocalDateTime startTime = history.getCreatedAt() != null ? history.getCreatedAt() : now.minusSeconds(elapsedSeconds);
+        Exam exam = history.getExam();
+        int totalQuestions = exam.getQuestionAmount();
+        double pointsPerQuestion = 10.0 / totalQuestions;
 
-        // Tính toán thời gian tối đa cho phép: Thời gian đề cấu hình (phút) * 60 + 30 giây bù trễ mạng
-        int maxTimeAllowedSeconds = history.getExam().getDurationMinutes() * 60 + 30;
-
-        // Tính khoảng chênh lệch giây thực tế từ lúc bắt đầu đến lúc nhấn nộp thực tế ở server
-        long actualElapsedSeconds = java.time.Duration.between(startTime, now).getSeconds();
-
-        boolean isOvertime = actualElapsedSeconds > maxTimeAllowedSeconds;
-
-        // 2. Lấy danh sách câu hỏi của đề thi này theo đúng thứ tự orderIndex
-        List<ExamQuestion> examQuestions = examQuestionRepository.findByExamExamIdOrderByOrderIndexAsc(examId);
-
-        int totalQuestions = history.getExam().getQuestionAmount();
         int correctAnswersCount = 0;
-        List<ExamAnswerReviewDTO> reviewList = new ArrayList<>();
+        double totalGrade = 0.0;
+        List<ExamAnswer> examAnswersToSave = new ArrayList<>();
 
-        // 3. Duyệt qua từng câu hỏi trong đề để đối chiếu với mảng câu trả lời selectedIndexes
-        for (int i = 0; i < examQuestions.size(); i++) {
-            ExamQuestion eq = examQuestions.get(i);
-            Question question = eq.getQuestion();
-            List<Answer> answers = question.getAnswers();
+        for (AnswerSelectionDTO ansSelection : body.getUserAnswers()) {
+            Question question = questionRepository.findById(ansSelection.getQuestionId())
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy câu hỏi: " + ansSelection.getQuestionId()));
 
-            int chosenIndex = (selectedIndexes != null && i < selectedIndexes.length) ? selectedIndexes[i] : -1;
-
-            Answer selectedAnswer = null;
+            String questionText = question.getContent();
+            String selectedAnswerText = "Học viên bỏ trống câu này";
             boolean isCorrect = false;
             double questionGrade = 0.0;
 
-            if (chosenIndex >= 0 && chosenIndex < answers.size()) {
-                selectedAnswer = answers.get(chosenIndex);
+            if (ansSelection.getSelectedAnswerId() != null && !ansSelection.getSelectedAnswerId().trim().isEmpty()) {
+                Answer selectedAnswer = answerRepository.findById(ansSelection.getSelectedAnswerId())
+                        .orElseThrow(() -> new RuntimeException("Không tìm thấy đáp án có ID: " + ansSelection.getSelectedAnswerId()));
 
-                //Nếu đáp án đúng VÀ bài làm KHÔNG bị quá giờ thì mới được ăn điểm
-                if (selectedAnswer != null && selectedAnswer.isCorrect()) {
-                    if (!isOvertime) {
-                        isCorrect = true;
-                        correctAnswersCount++;
-                        questionGrade = 10.0 / totalQuestions;
-                    } else {
-                        isCorrect = false; // Quá giờ thì dù chọn đúng vẫn tính là false
-                    }
+                selectedAnswerText = selectedAnswer.getContent();
+
+                if (selectedAnswer.isCorrect()) {
+                    isCorrect = true;
+                    correctAnswersCount++;
+                    questionGrade = pointsPerQuestion;
+                    totalGrade += pointsPerQuestion;
                 }
             }
 
-            String correctAnswerText = answers.stream()
-                    .filter(Answer::isCorrect)
-                    .map(Answer::getContent)
-                    .findFirst()
-                    .orElse("");
-
-            // 4. Lưu vết câu trả lời chi tiết vào bảng exam_answers
             ExamAnswer examAnswer = ExamAnswer.builder()
                     .examHistory(history)
-                    .questionId(question.getQuestionId())
+                    .questionId(ansSelection.getQuestionId())
                     .correct(isCorrect)
                     .grade(questionGrade)
-                    .questionSnapshot(question.getContent())
-                    .selectedAnswerSnapshot(selectedAnswer != null ? selectedAnswer.getContent() : "Không trả lời")
+                    .questionSnapshot(questionText)
+                    .selectedAnswerSnapshot(selectedAnswerText)
                     .build();
-            examAnswerRepository.save(examAnswer);
 
-            // 5. Thêm thông tin vào danh sách trả về hiển thị kết quả
-            ExamAnswerReviewDTO review = ExamAnswerReviewDTO.builder()
-                    .orderInExam(i + 1)
-                    .questionContent(question.getContent())
-                    .selectedAnswer(selectedAnswer != null ? selectedAnswer.getContent() : "Không trả lời")
-                    .correctAnswer(correctAnswerText)
-                    .correct(isCorrect)
-                    .grade(questionGrade)
-                    .build();
-            reviewList.add(review);
+            examAnswersToSave.add(examAnswer);
         }
 
-        // 6. Tính toán điểm số tổng hợp và làm tròn đến 2 chữ số thập phân
-        double finalScore = ((double) correctAnswersCount / totalQuestions) * 10;
-        finalScore = Math.round(finalScore * 100.0) / 100.0;
+        examAnswerRepository.saveAll(examAnswersToSave);
 
-        // 7. Cập nhật lại bản ghi lịch sử thi
-        history.setScore(finalScore);
-        // Nếu quá giờ, ghi nhận lại thời gian thực tế chạy lố của sinh viên, ngược lại lấy từ FE gửi lên
-        history.setElapsedSeconds(isOvertime ? (int) actualElapsedSeconds : elapsedSeconds);
-        history.setSubmittedAt(now);
+        history.setScore(totalGrade);
+        history.setElapsedSeconds(body.getElapsedSeconds());
+        history.setSubmittedAt(LocalDateTime.now());
         examHistoryRepository.save(history);
 
-        // 8. Trả về thông tin đầy đủ kết quả chấm điểm
-        return ExamAttemptResultDTO.builder()
-                .examHistoryId(history.getExamHistoryId())
-                .examName(history.getExam().getExamName())
-                .attemptNumber(history.getAttemptNumber())
-                .score(finalScore)
-                .elapsedSeconds(history.getElapsedSeconds())
-                .submittedAt(history.getSubmittedAt())
-                .totalQuestions(totalQuestions)
-                .correctAnswers(correctAnswersCount)
-                .answers(reviewList)
-                .build();
+        return findAttemptResult(history.getExamHistoryId());
     }
 
     @Override
@@ -237,6 +191,12 @@ public class ExamHistoryServiceImpl implements ExamHistoryService {
                 .stream()
                 .map(attemptHistoryMapper::toDTO)
                 .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true) // Tối ưu hóa hiệu năng đọc dữ liệu từ DB
+    public List<TeacherSubmissionDTO> getSubmissionsByExamId(String examId) {
+        return examHistoryRepository.findSubmissionsByExamId(examId);
     }
 
     // ================= START EXAM FIXES =================
@@ -336,25 +296,5 @@ public class ExamHistoryServiceImpl implements ExamHistoryService {
         }
 
         examHistoryRepository.save(history);
-    }
-
-
-    private double calculateScore(String examId, int[] selectedAnswerIndexes) {
-        List<Question> questions = questionRepository.findByExamId(examId);
-        double score = 0;
-
-        for (int i = 0; i < questions.size(); i++) {
-            Question q = questions.get(i);
-            Answer correct = answerRepository.findByQuestion_QuestionIdAndIsCorrectTrue(q.getQuestionId());
-            List<Answer> answers = answerRepository.findByQuestion_QuestionId(q.getQuestionId());
-
-            if (selectedAnswerIndexes[i] >= 0 && selectedAnswerIndexes[i] < answers.size()) {
-                Answer selected = answers.get(selectedAnswerIndexes[i]);
-                if (selected.getAnswerId().equals(correct.getAnswerId())) {
-                    score += 1;
-                }
-            }
-        }
-        return score;
     }
 }

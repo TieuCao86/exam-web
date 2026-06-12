@@ -43,6 +43,7 @@ public class ExamHistory {
     @Column(updatable = false)
     private LocalDateTime createdAt;
 
+    @Builder.Default
     @Column(name = "cheat_count", nullable = false)
     private int cheatCount = 0;
 }

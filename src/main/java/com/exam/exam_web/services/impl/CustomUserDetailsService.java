@@ -19,28 +19,17 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username)
-            throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        Account account = accountRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy tài khoản: " + username));
 
-        Account account = accountRepository
-                .findByUsername(username)
-                .orElseThrow(() ->
-                        new UsernameNotFoundException(
-                                "User not found: " + username
-                        ));
-
-        if (!account.isActive()) {
-            throw new DisabledException("Account disabled");
-        }
-
-        return new org.springframework.security.core.userdetails.User(
-                account.getUsername(),
-                account.getPasswordHash(),
-                List.of(
-                        new SimpleGrantedAuthority(
-                                "ROLE_" + account.getRole().name()
-                        )
-                )
-        );
+        // Dùng .roles() và truyền chuỗi "TEACHER" / "STUDENT" từ Enum .name()
+        // Spring Security sẽ tự hiểu và map khớp với .hasAnyRole("TEACHER", "ADMIN") trong SecurityConfig của bạn.
+        return org.springframework.security.core.userdetails.User.builder()
+                .username(account.getUsername())
+                .password(account.getPasswordHash()) // Đảm bảo cột password_hash dưới DB lưu đủ 60 ký tự chuỗi băm
+                .roles(account.getRole().name())     // Ép chuỗi Enum chuẩn (TEACHER, STUDENT, ADMIN)
+                .disabled(!account.isActive())
+                .build();
     }
 }

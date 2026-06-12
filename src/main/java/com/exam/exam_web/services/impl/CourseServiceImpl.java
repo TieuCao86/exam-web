@@ -1,202 +1,169 @@
 package com.exam.exam_web.services.impl;
 
 import com.exam.exam_web.dto.CourseDTO;
-import com.exam.exam_web.entity.*;
-import com.exam.exam_web.mapper.CourseMapper;
-import com.exam.exam_web.repository.*;
+import com.exam.exam_web.entity.Course;
+import com.exam.exam_web.entity.CourseStatus;
+import com.exam.exam_web.entity.Subject;
+import com.exam.exam_web.entity.Account; // 💡 Đổi từ User sang Account
+import com.exam.exam_web.repository.CourseRepository;
+import com.exam.exam_web.repository.SubjectRepository;
+import com.exam.exam_web.repository.AccountRepository; // 💡 Inject AccountRepository thay vì UserRepository
 import com.exam.exam_web.services.CourseService;
+import com.exam.exam_web.mapper.CourseMapper;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class CourseServiceImpl implements CourseService {
 
     private final CourseRepository courseRepository;
-    private final EnrollmentRepository enrollmentRepository;
-    private final AccountRepository accountRepository;
-    private final UserRepository userRepository;
-    private final ExamRepository examRepository;
-
+    private final SubjectRepository subjectRepository;
+    private final AccountRepository accountRepository; // 💡 Đã chuyển đổi sang AccountRepository
     private final CourseMapper courseMapper;
 
-    public CourseServiceImpl(
-            CourseRepository courseRepository,
-            EnrollmentRepository enrollmentRepository,
-            AccountRepository accountRepository,
-            UserRepository userRepository, ExamRepository examRepository,
-            CourseMapper courseMapper
-    ) {
-        this.courseRepository = courseRepository;
-        this.enrollmentRepository = enrollmentRepository;
-        this.accountRepository = accountRepository;
-        this.userRepository = userRepository;
-        this.examRepository = examRepository;
-        this.courseMapper = courseMapper;
-    }
-
-    // ================= SECURITY (TEMP) =================
-    private void requireAdmin() {
-        // TODO: Spring Security
-    }
-
-    // ================= CREATE =================
     @Override
+    @Transactional
     public CourseDTO create(CourseDTO dto) {
-        requireAdmin();
-
-        Course course = courseMapper.toEntity(dto);
-        return courseMapper.toDTO(courseRepository.save(course));
-    }
-
-    // ================= UPDATE =================
-    @Override
-    public CourseDTO update(CourseDTO dto) {
-        requireAdmin();
-
-        Course course = courseMapper.toEntity(dto);
-        return courseMapper.toDTO(courseRepository.save(course));
-    }
-
-    // ================= DELETE =================
-    @Override
-    public boolean delete(String courseId) {
-        requireAdmin();
-
-        if (!courseRepository.existsById(courseId)) {
-            return false;
+        if (dto.getCourseId() != null && courseRepository.existsById(dto.getCourseId())) {
+            throw new RuntimeException("Mã khóa học '" + dto.getCourseId() + "' đã tồn tại!");
         }
 
-        courseRepository.deleteById(courseId);
-        return true;
+        Subject subject = subjectRepository.findById(dto.getSubjectId())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy môn học: " + dto.getSubjectId()));
+
+        // 💡 Tìm trực tiếp tài khoản giáo viên trong bảng accounts (khớp với 'acc-teacher-001' trong SQL)
+        Account teacherAccount = accountRepository.findById(dto.getTeacherId())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy Giảng viên có mã tài khoản: " + dto.getTeacherId()));
+
+        CourseStatus status = CourseStatus.OPEN;
+        if (dto.getStatus() != null) {
+            try {
+                status = CourseStatus.valueOf(dto.getStatus().toUpperCase());
+            } catch (IllegalArgumentException e) {
+                status = CourseStatus.OPEN;
+            }
+        }
+
+        Course course = Course.builder()
+                .courseId(dto.getCourseId())
+                .courseName(dto.getCourseName())
+                .description(dto.getDescription())
+                .startDate(dto.getStartDate())
+                .academicYear(dto.getAcademicYear())
+                .semester(dto.getSemester())
+                .progress(dto.getProgress()) // Đã tối ưu theo kiểu double nguyên thủy
+                .imageUrl(dto.getImageUrl())
+                .status(status)
+                .subject(subject)
+                .teacher(teacherAccount) // 💡 Gán trực tiếp thực thể Account vào liên kết
+                .build();
+
+        Course savedCourse = courseRepository.save(course);
+        return courseMapper.toDTO(savedCourse);
     }
 
-    // ================= QUERY =================
     @Override
+    @Transactional
+    public CourseDTO update(CourseDTO dto) {
+        Course existingCourse = courseRepository.findById(dto.getCourseId())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy khóa học cần cập nhật!"));
+
+        existingCourse.setCourseName(dto.getCourseName());
+        existingCourse.setDescription(dto.getDescription());
+        existingCourse.setAcademicYear(dto.getAcademicYear());
+        existingCourse.setSemester(dto.getSemester());
+
+        if (dto.getStatus() != null) {
+            existingCourse.setStatus(CourseStatus.valueOf(dto.getStatus().toUpperCase()));
+        }
+        if (dto.getProgress() != 0) { // Check theo giá trị mặc định của kiểu số nguyên thủy
+            existingCourse.setProgress(dto.getProgress());
+        }
+
+        return courseMapper.toDTO(courseRepository.save(existingCourse));
+    }
+
+    @Override
+    @Transactional
+    public boolean delete(String courseId) {
+        if (courseRepository.existsById(courseId)) {
+            courseRepository.deleteById(courseId);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<CourseDTO> findAll() {
-        return courseRepository.findAll()
-                .stream()
+        return courseRepository.findAll().stream()
                 .map(courseMapper::toDTO)
-                .toList();
+                .collect(Collectors.toList());
     }
 
     @Override
+    @Transactional(readOnly = true)
     public CourseDTO findById(String courseId) {
         return courseRepository.findById(courseId)
+                .map(courseMapper::toDTO)
+                .orElseThrow(() -> new RuntimeException("Course not found"));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<CourseDTO> findByTeacher(String teacherId) {
+        return courseRepository.findByTeacher_AccountId(teacherId).stream()
+                .map(courseMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<CourseDTO> findByUser(String userId) {
+        return courseRepository.findByEnrollments_User_Account_AccountId(userId).stream()
+                .map(courseMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public CourseDTO getCourseByExamId(String examId) {
+        return courseRepository.findByExamId(examId)
                 .map(courseMapper::toDTO)
                 .orElse(null);
     }
 
-    // ================= STUDENT COURSES =================
     @Override
-    public List<CourseDTO> findByUser(String userId) {
-
-        return enrollmentRepository.findByUser_UserId(userId)
-                .stream()
-                .map(e -> {
-                    CourseDTO dto = courseMapper.toDTO(e.getCourse());
-                    dto.setStatus(e.getStatus().name());
-                    return dto;
-                })
-                .toList();
-    }
-
-    // ================= TEACHER COURSES =================
-    @Override
-    public List<CourseDTO> findByTeacher(String teacherId) {
-
-        return courseRepository.findByTeacher_AccountId(teacherId)
-                .stream()
-                .map(courseMapper::toDTO)
-                .toList();
-    }
-
-    // ================= EXAM -> COURSE =================
-    @Override
-    public CourseDTO getCourseByExamId(String examId) {
-
-        Exam exam = examRepository.findByIdWithCourse(examId)
-                .orElseThrow(() -> new RuntimeException("Exam not found"));
-
-        return courseMapper.toDTO(exam.getCourse());
-    }
-
-    // ================= ASSIGN TEACHER =================
-    @Override
+    @Transactional
     public CourseDTO assignTeacher(String courseId, String teacherId) {
-
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new RuntimeException("Course not found"));
 
-        Account teacher = accountRepository.findById(teacherId)
-                .orElseThrow(() -> new RuntimeException("Teacher not found"));
+        Account teacherAccount = accountRepository.findById(teacherId)
+                .orElseThrow(() -> new RuntimeException("Teacher account not found"));
 
-        if (teacher.getRole() != Role.TEACHER) {
-            throw new RuntimeException("User is not a teacher");
-        }
-
-        course.setTeacher(teacher);
-
+        course.setTeacher(teacherAccount);
         return courseMapper.toDTO(courseRepository.save(course));
     }
 
     @Override
-    public List<CourseDTO> findByFilter(
-            String semester,
-            String academicYear
-    ) {
-
-        List<Course> courses;
-
-        boolean hasSemester =
-                semester != null && !semester.isBlank();
-
-        boolean hasYear =
-                academicYear != null && !academicYear.isBlank();
-
-        if (hasSemester && hasYear) {
-
-            courses = courseRepository
-                    .findBySemesterAndAcademicYear(
-                            semester,
-                            academicYear
-                    );
-
-        } else if (hasSemester) {
-
-            courses = courseRepository
-                    .findBySemester(semester);
-
-        } else if (hasYear) {
-
-            courses = courseRepository
-                    .findByAcademicYear(academicYear);
-
-        } else {
-
-            courses = courseRepository.findAll();
-        }
-
-        return courses.stream()
+    @Transactional(readOnly = true)
+    public List<CourseDTO> findByFilter(String semester, String academicYear) {
+        return courseRepository.findBySemesterAndAcademicYear(semester, academicYear).stream()
                 .map(courseMapper::toDTO)
-                .toList();
+                .collect(Collectors.toList());
     }
 
     @Override
-    public List<CourseDTO> search(
-            String keyword,
-            String semester,
-            String academicYear
-    ) {
-
-        return courseRepository
-                .searchCourses(
-                        keyword,
-                        semester,
-                        academicYear
-                )
-                .stream()
+    @Transactional(readOnly = true)
+    public List<CourseDTO> search(String keyword, String semester, String academicYear) {
+        return courseRepository.searchCourses(keyword, semester, academicYear).stream()
                 .map(courseMapper::toDTO)
-                .toList();
+                .collect(Collectors.toList());
     }
 }
