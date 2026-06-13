@@ -1,6 +1,7 @@
 package com.exam.exam_web.services;
 
 import com.exam.exam_web.dto.CourseDTO;
+import com.exam.exam_web.dto.PageResponse; // Import DTO cấu trúc phân trang mới tạo
 
 import java.util.List;
 
@@ -30,5 +31,26 @@ public interface CourseService {
             String keyword,
             String semester,
             String academicYear
+    );
+
+    PageResponse<CourseDTO> getAllCoursesForAdmin(
+            String keyword,
+            String semester,
+            String academicYear,
+            int page,
+            int size,
+            String sortBy
+    );
+
+    PageResponse<CourseDTO> getCoursesByTeacher(
+            String teacherId,
+            int page,
+            int size
+    );
+
+    PageResponse<CourseDTO> getCoursesByStudent(
+            String studentId,
+            int page,
+            int size
     );
 }

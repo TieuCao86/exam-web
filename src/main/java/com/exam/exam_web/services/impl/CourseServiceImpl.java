@@ -1,16 +1,21 @@
 package com.exam.exam_web.services.impl;
 
 import com.exam.exam_web.dto.CourseDTO;
+import com.exam.exam_web.dto.PageResponse;
 import com.exam.exam_web.entity.Course;
 import com.exam.exam_web.entity.CourseStatus;
 import com.exam.exam_web.entity.Subject;
-import com.exam.exam_web.entity.Account; // 💡 Đổi từ User sang Account
+import com.exam.exam_web.entity.Account;
 import com.exam.exam_web.repository.CourseRepository;
 import com.exam.exam_web.repository.SubjectRepository;
-import com.exam.exam_web.repository.AccountRepository; // 💡 Inject AccountRepository thay vì UserRepository
+import com.exam.exam_web.repository.AccountRepository;
 import com.exam.exam_web.services.CourseService;
 import com.exam.exam_web.mapper.CourseMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,7 +28,7 @@ public class CourseServiceImpl implements CourseService {
 
     private final CourseRepository courseRepository;
     private final SubjectRepository subjectRepository;
-    private final AccountRepository accountRepository; // 💡 Đã chuyển đổi sang AccountRepository
+    private final AccountRepository accountRepository;
     private final CourseMapper courseMapper;
 
     @Override
@@ -36,7 +41,6 @@ public class CourseServiceImpl implements CourseService {
         Subject subject = subjectRepository.findById(dto.getSubjectId())
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy môn học: " + dto.getSubjectId()));
 
-        // 💡 Tìm trực tiếp tài khoản giáo viên trong bảng accounts (khớp với 'acc-teacher-001' trong SQL)
         Account teacherAccount = accountRepository.findById(dto.getTeacherId())
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy Giảng viên có mã tài khoản: " + dto.getTeacherId()));
 
@@ -56,11 +60,11 @@ public class CourseServiceImpl implements CourseService {
                 .startDate(dto.getStartDate())
                 .academicYear(dto.getAcademicYear())
                 .semester(dto.getSemester())
-                .progress(dto.getProgress()) // Đã tối ưu theo kiểu double nguyên thủy
+                .progress(dto.getProgress())
                 .imageUrl(dto.getImageUrl())
                 .status(status)
                 .subject(subject)
-                .teacher(teacherAccount) // 💡 Gán trực tiếp thực thể Account vào liên kết
+                .teacher(teacherAccount)
                 .build();
 
         Course savedCourse = courseRepository.save(course);
@@ -81,7 +85,7 @@ public class CourseServiceImpl implements CourseService {
         if (dto.getStatus() != null) {
             existingCourse.setStatus(CourseStatus.valueOf(dto.getStatus().toUpperCase()));
         }
-        if (dto.getProgress() != 0) { // Check theo giá trị mặc định của kiểu số nguyên thủy
+        if (dto.getProgress() != 0) {
             existingCourse.setProgress(dto.getProgress());
         }
 
@@ -117,7 +121,9 @@ public class CourseServiceImpl implements CourseService {
     @Override
     @Transactional(readOnly = true)
     public List<CourseDTO> findByTeacher(String teacherId) {
-        return courseRepository.findByTeacher_AccountId(teacherId).stream()
+        // 💡 ĐÃ ĐỒNG BỘ: Truyền Pageable.unpaged() để lấy hết danh sách dạng List cho hàm cũ không phân trang
+        Page<Course> coursePage = courseRepository.findByTeacher_AccountId(teacherId, Pageable.unpaged());
+        return coursePage.getContent().stream()
                 .map(courseMapper::toDTO)
                 .collect(Collectors.toList());
     }
@@ -125,7 +131,9 @@ public class CourseServiceImpl implements CourseService {
     @Override
     @Transactional(readOnly = true)
     public List<CourseDTO> findByUser(String userId) {
-        return courseRepository.findByEnrollments_User_Account_AccountId(userId).stream()
+        // 💡 ĐÃ ĐỒNG BỘ: Truyền Pageable.unpaged() để lấy hết danh sách dạng List cho hàm cũ không phân trang
+        Page<Course> coursePage = courseRepository.findByEnrollments_User_Account_AccountId(userId, Pageable.unpaged());
+        return coursePage.getContent().stream()
                 .map(courseMapper::toDTO)
                 .collect(Collectors.toList());
     }
@@ -162,8 +170,72 @@ public class CourseServiceImpl implements CourseService {
     @Override
     @Transactional(readOnly = true)
     public List<CourseDTO> search(String keyword, String semester, String academicYear) {
-        return courseRepository.searchCourses(keyword, semester, academicYear).stream()
+        Page<Course> coursePage =
+                courseRepository.searchCourses(keyword, semester, academicYear, Pageable.unpaged());
+
+        return coursePage.getContent().stream()
                 .map(courseMapper::toDTO)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PageResponse<CourseDTO> getAllCoursesForAdmin(String keyword, String semester, String academicYear, int page, int size, String sortBy) {
+        String[] sortParams = sortBy.split(",");
+        Sort sort = sortParams[1].equalsIgnoreCase("desc")
+                ? Sort.by(sortParams[0]).descending()
+                : Sort.by(sortParams[0]).ascending();
+
+        Pageable pageable = PageRequest.of(page, 12, sort);
+        Page<Course> coursePage = courseRepository.searchCourses(keyword, semester, academicYear, pageable);
+
+        List<CourseDTO> dtoList = coursePage.getContent().stream()
+                .map(courseMapper::toDTO)
+                .collect(Collectors.toList());
+
+        return PageResponse.<CourseDTO>builder()
+                .content(dtoList)
+                .pageNumber(coursePage.getNumber())
+                .pageSize(coursePage.getSize())
+                .totalElements(coursePage.getTotalElements())
+                .totalPages(coursePage.getTotalPages())
+                .isLast(coursePage.isLast())
+                .build();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PageResponse<CourseDTO> getCoursesByTeacher(String teacherId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, 12, Sort.by("startDate").descending());
+        Page<Course> coursePage = courseRepository.findByTeacher_AccountId(teacherId, pageable);
+
+        List<CourseDTO> dtoList = coursePage.getContent().stream().map(courseMapper::toDTO).toList();
+
+        return PageResponse.<CourseDTO>builder()
+                .content(dtoList)
+                .pageNumber(coursePage.getNumber())
+                .pageSize(coursePage.getSize())
+                .totalElements(coursePage.getTotalElements())
+                .totalPages(coursePage.getTotalPages())
+                .isLast(coursePage.isLast())
+                .build();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PageResponse<CourseDTO> getCoursesByStudent(String studentId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, 12, Sort.by("courseName").ascending());
+        Page<Course> coursePage = courseRepository.findByEnrollments_User_Account_AccountId(studentId, pageable);
+
+        List<CourseDTO> dtoList = coursePage.getContent().stream().map(courseMapper::toDTO).toList();
+
+        return PageResponse.<CourseDTO>builder()
+                .content(dtoList)
+                .pageNumber(coursePage.getNumber())
+                .pageSize(coursePage.getSize())
+                .totalElements(coursePage.getTotalElements())
+                .totalPages(coursePage.getTotalPages())
+                .isLast(coursePage.isLast())
+                .build();
     }
 }

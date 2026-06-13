@@ -1,6 +1,7 @@
 package com.exam.exam_web.api.teacher;
 
 import com.exam.exam_web.dto.ExamDTO;
+import com.exam.exam_web.dto.PageResponse;
 import com.exam.exam_web.dto.TeacherSubmissionDTO;
 import com.exam.exam_web.services.ExamHistoryService;
 import com.exam.exam_web.services.ExamService;
@@ -20,11 +21,18 @@ public class TeacherExamController {
     private final ExamService examService;
     private final ExamHistoryService examHistoryService;
 
-    // =====================================================================
     // 1. QUẢN LÝ CẤU HÌNH ĐỀ THI (CRUD)
-    // =====================================================================
 
-    // Lấy danh sách tất cả đề thi do Giáo viên này quản lý/tạo ra
+    @GetMapping("/page")
+    public ResponseEntity<PageResponse<ExamDTO>> getExamsByTeacherPaged(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(defaultValue = "0") int page
+    ) {
+        // Tận dụng luồng xử lý phân trang chung mà chúng ta vừa hoàn thiện ở Service
+        return ResponseEntity.ok(examService.findAllPaged(keyword, page));
+    }
+
+    // Lấy danh sách tất cả đề thi do Giáo viên này quản lý/tạo ra (Không phân trang cũ)
     @GetMapping
     public List<ExamDTO> getExamsByTeacher(@RequestParam String teacherId) {
         return examService.findAllByTeacherId(teacherId);
@@ -37,14 +45,14 @@ public class TeacherExamController {
         return dto != null ? ResponseEntity.ok(dto) : ResponseEntity.notFound().build();
     }
 
-    // Tạo mới một đề thi (Cấu hình thời gian, mật khẩu, số câu hỏi, cách tính điểm)
+    // Tạo mới một đề thi
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ExamDTO createExam(@RequestBody ExamDTO dto) {
         return examService.createExam(dto);
     }
 
-    // Cập nhật cấu hình đề thi (Gia hạn thời gian đóng/mở đề, đổi mật khẩu)
+    // Cập nhật cấu hình đề thi
     @PutMapping("/{examId}")
     public ExamDTO updateExam(@PathVariable String examId, @RequestBody ExamDTO dto) {
         dto.setExamId(examId);
@@ -58,7 +66,7 @@ public class TeacherExamController {
         return isDeleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
     }
 
-    // Gán một đề thi có sẵn vào một Khóa học/Lớp học cụ thể mà Admin đã mở
+    // Gán một đề thi có sẵn vào một Khóa học/Lớp học cụ thể
     @PostMapping("/{examId}/assign-course")
     public ResponseEntity<Void> assignToCourse(
             @PathVariable String examId,
@@ -68,12 +76,9 @@ public class TeacherExamController {
         return ResponseEntity.ok().build();
     }
 
-    // =====================================================================
     // 2. GIÁM SÁT VÀ QUẢN LÝ KẾT QUẢ THI CỦA SINH VIÊN
-    // =====================================================================
 
-    // Lấy danh sách toàn bộ bài làm, điểm số của tất cả sinh viên thuộc một đề thi (Bảng điểm của lớp)
-    // URL Postman chuẩn: GET http://localhost:8080/api/teacher/exams/{examId}/submissions
+    // Lấy danh sách toàn bộ bài làm, điểm số của tất cả sinh viên thuộc một đề thi
     @GetMapping("/{examId}/submissions")
     public ResponseEntity<List<TeacherSubmissionDTO>> getSubmissionsByExam(@PathVariable("examId") String examId) {
         List<TeacherSubmissionDTO> submissions = examHistoryService.getSubmissionsByExamId(examId);

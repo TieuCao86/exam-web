@@ -33,12 +33,13 @@ public class SecurityConfig {
                                 "/api/courses/**"
                         ).permitAll()
 
+                        .requestMatchers("/api/**").permitAll()
+
                         // BẮT BUỘC các API nằm trong gói /api/teacher/** phải có quyền TEACHER hoặc ADMIN
                         // (Thêm dòng này giúp Postman không bị lọt xuống formLogin)
                         .requestMatchers("/api/teacher/**").hasAnyRole("TEACHER", "ADMIN")
 
                         // Các API chung khác nếu có
-                        .requestMatchers("/api/**").permitAll()
 
                         // 3. PHÂN QUYỀN CHO CÁC TRANG GIAO DIỆN (VIEW - MVC WEB)
                         .requestMatchers("/students/**").hasRole("ADMIN")

@@ -2,6 +2,8 @@ package com.exam.exam_web.repository;
 
 import com.exam.exam_web.entity.Course;
 import com.exam.exam_web.entity.CourseStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -11,7 +13,7 @@ import java.util.Optional;
 
 public interface CourseRepository extends JpaRepository<Course, String> {
 
-    List<Course> findByTeacher_AccountId(String teacherId);
+    Page<Course> findByTeacher_AccountId(String teacherId, Pageable pageable);
 
     List<Course> findBySubject_SubjectId(String subjectId);
 
@@ -23,7 +25,7 @@ public interface CourseRepository extends JpaRepository<Course, String> {
 
     List<Course> findBySemesterAndAcademicYear(String semester, String academicYear);
 
-    List<Course> findByEnrollments_User_Account_AccountId(String studentId);
+    Page<Course> findByEnrollments_User_Account_AccountId(String studentId, Pageable pageable);
 
     @Query("SELECT c FROM Course c JOIN c.exams e WHERE e.examId = :examId")
     Optional<Course> findByExamId(@Param("examId") String examId);
@@ -35,9 +37,10 @@ public interface CourseRepository extends JpaRepository<Course, String> {
           AND (:semester IS NULL OR c.semester = :semester)
           AND (:academicYear IS NULL OR c.academicYear = :academicYear)
     """)
-    List<Course> searchCourses(
+    Page<Course> searchCourses(
             @Param("keyword") String keyword,
             @Param("semester") String semester,
-            @Param("academicYear") String academicYear
+            @Param("academicYear") String academicYear,
+            Pageable pageable
     );
 }

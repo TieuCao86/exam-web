@@ -20,6 +20,39 @@ public class StudentExamController {
     private final QuestionService questionService;
     private final ExamHistoryService examHistoryService;
 
+    // ENDPOINT PHÂN TRANG ĐỀ THI CHO SINH VIÊN (12 ĐỀ / TRANG)
+
+    // 1. Tab Đề thi khả dụng (Đang trong thời gian mở cổng làm bài)
+    @GetMapping("/available/page")
+    public ResponseEntity<PageResponse<ExamDTO>> getAvailableExamsPaged(
+            @RequestParam String userId,
+            @RequestParam(defaultValue = "0") int page
+    ) {
+        return ResponseEntity.ok(examService.findAvailableExamsPaged(userId, page));
+    }
+
+    // 2. Tab Đề thi sắp diễn ra (Lịch thi tương lai chưa đến giờ mở)
+    @GetMapping("/upcoming/page")
+    public ResponseEntity<PageResponse<ExamDTO>> getUpcomingExamsPaged(
+            @RequestParam String userId,
+            @RequestParam(defaultValue = "0") int page
+    ) {
+        return ResponseEntity.ok(examService.findUpcomingExamsPaged(userId, page));
+    }
+
+    // 3. Tab Đề thi đã đóng cổng (Lịch sử các đề thi đã hết hạn)
+    @GetMapping("/expired/page")
+    public ResponseEntity<PageResponse<ExamDTO>> getExpiredExamsPaged(
+            @RequestParam String userId,
+            @RequestParam(defaultValue = "0") int page
+    ) {
+        return ResponseEntity.ok(examService.findExpiredExamsPaged(userId, page));
+    }
+
+    // =====================================================================
+    // VÙNG LOGIC LÀM BÀI VÀ THI
+    // =====================================================================
+
     // Xem cấu hình tổng quan của một đề thi trước khi bấm vào thi
     @GetMapping("/{examId}")
     public ExamDTO getById(@PathVariable String examId) {
@@ -73,18 +106,13 @@ public class StudentExamController {
     }
 
     // Bấm nộp bài (Hệ thống tự động chấm điểm trên Server và trả kết quả lập tức)
-    // 8. Nộp bài và chấm điểm thực tế tại Server dựa trên questionId và answerId
     @PostMapping("/{examId}/submit")
     public ExamAttemptResultDTO submitExam(
             @PathVariable String examId,
             @RequestParam String userId,
             @RequestBody ExamSubmitBody body
     ) {
-        return examHistoryService.submitExam(
-                examId,
-                userId,
-                body
-        );
+        return examHistoryService.submitExam(examId, userId, body);
     }
 
     // Xem danh sách tóm tắt lịch sử thi ở trang cá nhân của Sinh viên

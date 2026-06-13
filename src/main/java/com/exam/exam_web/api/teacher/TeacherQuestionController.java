@@ -1,5 +1,6 @@
 package com.exam.exam_web.api.teacher;
 
+import com.exam.exam_web.dto.PageResponse;
 import com.exam.exam_web.dto.QuestionDTO;
 import com.exam.exam_web.services.QuestionService;
 import lombok.RequiredArgsConstructor;
@@ -17,20 +18,30 @@ public class TeacherQuestionController {
 
     private final QuestionService questionService;
 
-    // 1. Lấy tất cả câu hỏi thuộc một Môn học (Subject) để giáo viên quản lý kho
+    @GetMapping("/subject/{subjectId}/page")
+    public ResponseEntity<PageResponse<QuestionDTO>> getQuestionsBySubjectPaged(
+            @PathVariable String subjectId,
+            @RequestParam(defaultValue = "0") int page
+    ) {
+        // Sau này bạn viết hàm nhận Pageable trong QuestionService để bọc PageResponse tại đây:
+        // return ResponseEntity.ok(questionService.findBySubjectPaged(subjectId, page, 12));
+        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+    }
+
+    // 1. Lấy tất cả câu hỏi thuộc một Môn học (Không phân trang cũ)
     @GetMapping("/subject/{subjectId}")
     public List<QuestionDTO> getQuestionsBySubject(@PathVariable String subjectId) {
         return questionService.findBySubject(subjectId);
     }
 
-    // 2. Xem chi tiết 1 câu hỏi (Bao gồm cả text nội dung và danh sách các đáp án A, B, C, D)
+    // 2. Xem chi tiết 1 câu hỏi (Kèm danh sách đáp án)
     @GetMapping("/{questionId}")
     public ResponseEntity<QuestionDTO> getQuestionDetail(@PathVariable String questionId) {
         QuestionDTO dto = questionService.findById(questionId);
         return dto != null ? ResponseEntity.ok(dto) : ResponseEntity.notFound().build();
     }
 
-    // 3. Thêm một câu hỏi mới vào Ngân hàng đề (Kèm theo mảng đáp án, đánh dấu isCorrect = true/false)
+    // 3. Thêm một câu hỏi mới vào Ngân hàng đề
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public QuestionDTO createQuestion(@RequestBody QuestionDTO dto) {

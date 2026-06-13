@@ -14,9 +14,15 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface CourseMapper {
 
-    // MapStruct tự động kích hoạt ánh xạ lặp cho chapters và exams dựa vào các hàm định nghĩa phía dưới
+    //
+    @Mapping(target = "subjectId", source = "subject.subjectId")
+    @Mapping(target = "teacherId", source = "teacher.accountId")
+    @Mapping(target = "teacherName", source = "teacher.username")
     CourseDTO toDTO(Course course);
 
+    //
+    @Mapping(target = "subject", ignore = true)
+    @Mapping(target = "teacher", ignore = true)
     Course toEntity(CourseDTO dto);
 
     // Định nghĩa cách map từ Entity Chapter sang ChapterDTO

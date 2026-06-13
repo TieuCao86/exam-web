@@ -1,6 +1,7 @@
 package com.exam.exam_web.services;
 
 import com.exam.exam_web.dto.ExamDTO;
+import com.exam.exam_web.dto.PageResponse;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -78,4 +79,9 @@ public interface ExamService {
     );
 
     boolean verifyPassword(String examId, String password);
+
+    PageResponse<ExamDTO> findAllPaged(String keyword, int page);
+    PageResponse<ExamDTO> findAvailableExamsPaged(String userId, int page);
+    PageResponse<ExamDTO> findUpcomingExamsPaged(String userId, int page);
+    PageResponse<ExamDTO> findExpiredExamsPaged(String userId, int page);
 }
