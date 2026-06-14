@@ -9,6 +9,7 @@ export default function Login() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        console.log("ĐÃ CLICK NÚT LOGIN THÀNH CÔNG! Đang chuẩn bị gửi dữ liệu...");
         setLoading(true);
         setErrorMsg('');
 
