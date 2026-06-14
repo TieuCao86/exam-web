@@ -1,6 +1,7 @@
 package com.exam.exam_web.services;
 
 import com.exam.exam_web.dto.ExamQuestionDTO;
+import com.exam.exam_web.dto.PageResponse;
 import com.exam.exam_web.dto.QuestionDTO;
 
 import java.util.List;
@@ -46,4 +47,6 @@ public interface QuestionService {
     List<ExamQuestionDTO> getExamQuestions(
             String examId
     );
+
+    PageResponse<QuestionDTO> findBySubjectPaged(String subjectId, int page, int size);
 }

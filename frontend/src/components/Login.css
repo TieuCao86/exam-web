@@ -1,0 +1,158 @@
+/* ── HỆ THỐNG BIẾN MÀU THƯƠNG HIỆU ĐỒNG BỘ ── */
+:root {
+    --bg-login:       #eeecdd;
+    --panel-left:     #d9d9d9;
+    --primary-color:  #1E424D;
+    --btn-color:      #1E424D;
+    --btn-hover:      #142d34;
+    --accent-color:   #DDB248;
+    --error-color:    #e74c3c;
+    --radius-panel:   28px;
+}
+
+.login-layout {
+    display: flex;
+    width: 100%;
+    min-height: 100vh;
+    padding: 20px;
+    background: var(--bg-login);
+    font-family: 'Inter', sans-serif;
+}
+
+/* ── PANEL TRÁI: LOGO BẤT ĐỐI XỨNG ── */
+.login-left-panel {
+    flex: 1;
+    background: var(--panel-left);
+    border-radius: var(--radius-panel);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100%;
+    animation: loginFadeInLeft 0.6s ease both;
+}
+
+.login-logo-wrap img {
+    width: 320px;
+    max-width: 80%;
+    display: block;
+}
+
+/* ── PANEL PHẢI: FORM ĐĂNG NHẬP ── */
+.login-right-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 80px;
+    gap: 24px;
+    animation: loginFadeInRight 0.6s ease both;
+}
+
+.login-title {
+    font-family: 'Raleway', sans-serif;
+    font-size: 40px;
+    font-weight: 800;
+    color: var(--primary-color);
+    letter-spacing: 4px;
+    align-self: flex-start;
+    width: 100%;
+    max-width: 420px;
+}
+
+.login-form {
+    width: 100%;
+    max-width: 420px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* ── INPUTS (UNDERLINE STYLE SYSTEM) ── */
+.login-field-group {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.login-field-group input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid var(--primary-color);
+    outline: none;
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    color: #333;
+    padding: 10px 2px;
+    transition: border-color 0.2s;
+}
+
+.login-field-group input::placeholder {
+    color: #888;
+    font-size: 15px;
+}
+
+.login-field-group input:focus {
+    border-bottom-color: var(--accent-color); /* Đổi màu sang vàng nghệ khi click */
+}
+
+/* ── THÔNG BÁO LỖI UX HEURISTICS ── */
+.login-error-label {
+    width: 100%;
+    max-width: 420px;
+    background: rgba(231, 76, 60, 0.1);
+    color: var(--error-color);
+    font-size: 14px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border-left: 4px solid var(--error-color);
+}
+
+/* ── NÚT BẤM (BUTTON) ── */
+.login-submit-btn {
+    width: 100%;
+    background: var(--btn-color);
+    color: #fff;
+    font-family: 'Raleway', sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    border: none;
+    border-radius: 8px;
+    padding: 14px 0;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+}
+
+.login-submit-btn:hover:not(:disabled) {
+    background: var(--btn-hover);
+}
+
+.login-submit-btn:active:not(:disabled) {
+    transform: scale(0.98);
+}
+
+.login-submit-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* ── HIỆU ỨNG CHUYỂN ĐỘNG (ANIMATIONS) ── */
+@keyframes loginFadeInLeft {
+    from { opacity: 0; transform: translateX(-24px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes loginFadeInRight {
+    from { opacity: 0; transform: translateX(24px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+/* ── THÍCH ỨNG TRÌNH DUYỆT (RESPONSIVE) ── */
+@media (max-width: 700px) {
+    .login-layout        { flex-direction: column; padding: 12px; }
+    .login-left-panel    { min-height: 220px; flex: none; border-radius: 20px; }
+    .login-right-panel   { padding: 40px 24px; }
+    .login-title         { font-size: 30px; }
+}

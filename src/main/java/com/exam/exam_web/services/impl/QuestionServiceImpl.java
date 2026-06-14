@@ -2,6 +2,7 @@ package com.exam.exam_web.services.impl;
 
 import com.exam.exam_web.dto.ExamOptionDTO;
 import com.exam.exam_web.dto.ExamQuestionDTO;
+import com.exam.exam_web.dto.PageResponse;
 import com.exam.exam_web.dto.QuestionDTO;
 import com.exam.exam_web.entity.Answer;
 import com.exam.exam_web.entity.Exam;
@@ -14,7 +15,12 @@ import com.exam.exam_web.repository.ExamRepository;
 import com.exam.exam_web.repository.QuestionRepository;
 import com.exam.exam_web.repository.SubjectRepository;
 import com.exam.exam_web.services.QuestionService;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -203,6 +209,32 @@ public class QuestionServiceImpl implements QuestionService {
         }
 
         return result;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PageResponse<QuestionDTO> findBySubjectPaged(String subjectId, int page, int size) {
+
+        // 1. Khởi tạo Pageable ép cứng cỡ trang (12 bản ghi), sắp xếp tăng dần theo ID câu hỏi
+        Pageable pageable = PageRequest.of(page, size, Sort.by("questionId").ascending());
+
+        // 2. Gọi xuống Repo lấy dữ liệu dạng Page phân mảnh dưới DB
+        Page<Question> questionPage = questionRepository.findBySubject_SubjectId(subjectId, pageable);
+
+        // 3. Chuyển đổi danh sách Entity con sang DTO bằng Mapper giống như hàm findBySubject cũ của bạn
+        List<QuestionDTO> dtoList = questionPage.getContent().stream()
+                .map(questionMapper::toDTO)
+                .toList();
+
+        // 4. Đóng gói trọn vẹn vào khuôn PageResponse để đẩy về cho Controller
+        return PageResponse.<QuestionDTO>builder()
+                .content(dtoList)
+                .pageNumber(questionPage.getNumber())
+                .pageSize(questionPage.getSize())
+                .totalElements(questionPage.getTotalElements())
+                .totalPages(questionPage.getTotalPages())
+                .isLast(questionPage.isLast())
+                .build();
     }
 
     private List<Answer> buildAnswers(QuestionDTO dto, Question question) {

@@ -24,8 +24,7 @@ public class TeacherQuestionController {
             @RequestParam(defaultValue = "0") int page
     ) {
         // Sau này bạn viết hàm nhận Pageable trong QuestionService để bọc PageResponse tại đây:
-        // return ResponseEntity.ok(questionService.findBySubjectPaged(subjectId, page, 12));
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+         return ResponseEntity.ok(questionService.findBySubjectPaged(subjectId, page, 12));
     }
 
     // 1. Lấy tất cả câu hỏi thuộc một Môn học (Không phân trang cũ)

@@ -27,19 +27,16 @@ public class SecurityConfig {
                         ).permitAll()
 
                         // 2. PHÂN QUYỀN RIÊNG CHO CÁC ĐƯỜNG DẪN REST API (/api/**)
-                        // Cho phép sinh viên/mọi người gọi các API chung (xem đề, xem khóa học)
                         .requestMatchers(
                                 "/api/exams/**",
-                                "/api/courses/**"
+                                "/api/courses/**",
+                                "/api/teacher/questions/**"
                         ).permitAll()
 
                         .requestMatchers("/api/**").permitAll()
 
                         // BẮT BUỘC các API nằm trong gói /api/teacher/** phải có quyền TEACHER hoặc ADMIN
-                        // (Thêm dòng này giúp Postman không bị lọt xuống formLogin)
                         .requestMatchers("/api/teacher/**").hasAnyRole("TEACHER", "ADMIN")
-
-                        // Các API chung khác nếu có
 
                         // 3. PHÂN QUYỀN CHO CÁC TRANG GIAO DIỆN (VIEW - MVC WEB)
                         .requestMatchers("/students/**").hasRole("ADMIN")
@@ -51,13 +48,48 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
 
-                // CẤU HÌNH ĐĂNG NHẬP GIAO DIỆN (Cho trình duyệt)
+                // CẤU HÌNH ĐĂNG NHẬP GIAO DIỆN (Tương thích cả Thymeleaf lẫn React)
                 .formLogin(form -> form
                         .loginPage("/login")
                         .usernameParameter("username")
                         .passwordParameter("password")
-                         .successHandler(new RoleBasedSuccessHandler()) // Tạm thời comment dòng này khi test bằng Postman nếu nó gây loop
-                        .failureUrl("/login?error")
+
+                                // 💡 CẬP NHẬT TRONG SUCCESS HANDLER:
+                                .successHandler((request, response, authentication) -> {
+                                    String acceptHeader = request.getHeader("Accept");
+                                    String xRequestedWith = request.getHeader("X-Requested-With");
+
+                                    // Nới lỏng điều kiện: Chỉ cần một trong các dấu hiệu từ React/Ajax xuất hiện là duyệt luôn
+                                    if ((acceptHeader != null && acceptHeader.contains("application/json"))
+                                            || "XMLHttpRequest".equals(xRequestedWith)
+                                            || request.getRequestURI().contains("/api")) {
+
+                                        response.setStatus(jakarta.servlet.http.HttpServletResponse.SC_OK);
+                                        response.setContentType("application/json;charset=UTF-8");
+                                        response.getWriter().write("{\"success\": true, \"message\": \"Login successful\"}");
+                                        response.getWriter().flush();
+                                    } else {
+                                        new RoleBasedSuccessHandler().onAuthenticationSuccess(request, response, authentication);
+                                    }
+                                })
+
+// 💡 CẬP NHẬT TRONG FAILURE HANDLER:
+                                .failureHandler((request, response, exception) -> {
+                                    String acceptHeader = request.getHeader("Accept");
+                                    String xRequestedWith = request.getHeader("X-Requested-With");
+
+                                    if ((acceptHeader != null && acceptHeader.contains("application/json"))
+                                            || "XMLHttpRequest".equals(xRequestedWith)
+                                            || request.getRequestURI().contains("/api")) {
+
+                                        response.setStatus(jakarta.servlet.http.HttpServletResponse.SC_UNAUTHORIZED);
+                                        response.setContentType("application/json;charset=UTF-8");
+                                        response.getWriter().write("{\"success\": false, \"message\": \"Invalid username or password\"}");
+                                        response.getWriter().flush();
+                                    } else {
+                                        response.sendRedirect("/login?error");
+                                    }
+                                })
                         .permitAll()
                 )
 

@@ -1,14 +1,21 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
-  server:{
-    proxy:{
-      '/api':{
+  server: {
+    port: 5173,
+    proxy: {
+      // 💡 CẤU HÌNH MẠNH MẼ: Bắt trọn gói endpoint /login bất kể GET/POST hay Form data
+      '/login': {
         target: 'http://localhost:8080',
         changeOrigin: true,
+        secure: false,
+      },
+      '/api': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+        secure: false,
       }
     }
   }
