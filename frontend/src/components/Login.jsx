@@ -27,12 +27,12 @@ export default function Login() {
         try {
             const response = await fetch(targetUrl, {
                 method: 'POST',
+                credentials: 'include',
                 headers: {
-                    // ĐỒNG BỘ: Ép cả 2 nhận diện để Spring Boot không thể bắt hụt tín hiệu Ajax
                     'Accept': 'application/json',
                     'X-Requested-With': 'XMLHttpRequest'
                 },
-                body: formData,
+                body: formData
             });
 
             // In trực tiếp trạng thái ra tab Console (F12) để bạn dễ kiểm tra kiểm toán

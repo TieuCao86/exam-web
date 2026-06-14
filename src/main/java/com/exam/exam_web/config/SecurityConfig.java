@@ -1,24 +1,36 @@
 package com.exam.exam_web.config;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 @Configuration
 public class SecurityConfig {
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http)
-            throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http
-                .csrf(csrf -> csrf.disable()) // Tắt CSRF để test API qua Postman mượt mà
+                .cors(Customizer.withDefaults())
+                .csrf(csrf -> csrf.disable())
 
                 .authorizeHttpRequests(auth -> auth
-                        // 1. MỞ KHÓA CHO TẤT CẢ TÀI NGUYÊN TĨNH VÀ TRANG LOGIN
+
+                        // Cho phép preflight request
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
+                        // Login + static resources
                         .requestMatchers(
                                 "/login",
                                 "/css/**",
@@ -26,7 +38,7 @@ public class SecurityConfig {
                                 "/images/**"
                         ).permitAll()
 
-                        // 2. PHÂN QUYỀN RIÊNG CHO CÁC ĐƯỜNG DẪN REST API (/api/**)
+                        // API public
                         .requestMatchers(
                                 "/api/exams/**",
                                 "/api/courses/**",
@@ -35,50 +47,110 @@ public class SecurityConfig {
 
                         .requestMatchers("/api/**").permitAll()
 
-                        // BẮT BUỘC các API nằm trong gói /api/teacher/** phải có quyền TEACHER hoặc ADMIN
-                        .requestMatchers("/api/teacher/**").hasAnyRole("TEACHER", "ADMIN")
+                        // API teacher
+                        .requestMatchers("/api/teacher/**")
+                        .hasAnyRole("TEACHER", "ADMIN")
 
-                        // 3. PHÂN QUYỀN CHO CÁC TRANG GIAO DIỆN (VIEW - MVC WEB)
-                        .requestMatchers("/students/**").hasRole("ADMIN")
-                        .requestMatchers("/questions/**").hasRole("TEACHER")
-                        .requestMatchers("/calendar/**").hasRole("STUDENT")
-                        .requestMatchers("/courses/**", "/exams/**", "/history/**").authenticated()
+                        // MVC pages
+                        .requestMatchers("/students/**")
+                        .hasRole("ADMIN")
 
-                        // Tất cả các yêu cầu còn lại đều phải đăng nhập
+                        .requestMatchers("/questions/**")
+                        .hasRole("TEACHER")
+
+                        .requestMatchers("/calendar/**")
+                        .hasRole("STUDENT")
+
+                        .requestMatchers(
+                                "/courses/**",
+                                "/exams/**",
+                                "/history/**"
+                        ).authenticated()
+
                         .anyRequest().authenticated()
                 )
 
-                // CẤU HÌNH ĐĂNG NHẬP GIAO DIỆN (Tương thích cả Thymeleaf lẫn React)
                 .formLogin(form -> form
+
                         .loginPage("/login")
+                        .loginProcessingUrl("/login")
+
                         .usernameParameter("username")
                         .passwordParameter("password")
 
-                        // 💡 ĐÃ SỬA: Thành công là trả về JSON 200 luôn, không nhảy trang
                         .successHandler((request, response, authentication) -> {
-                            response.setStatus(jakarta.servlet.http.HttpServletResponse.SC_OK);
+                            response.setStatus(HttpServletResponse.SC_OK);
                             response.setContentType("application/json;charset=UTF-8");
-                            response.getWriter().write("{\"success\": true, \"message\": \"Login successful\"}");
-                            response.getWriter().flush();
+
+                            response.getWriter().write("""
+                                    {
+                                      "success": true,
+                                      "message": "Login successful"
+                                    }
+                                    """);
                         })
 
-                        // 💡 ĐÃ SỬA: Thất bại là trả về JSON 401 Unauthorized luôn, không Redirect đi đâu hết
                         .failureHandler((request, response, exception) -> {
-                            response.setStatus(jakarta.servlet.http.HttpServletResponse.SC_UNAUTHORIZED);
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                             response.setContentType("application/json;charset=UTF-8");
-                            response.getWriter().write("{\"success\": false, \"message\": \"Invalid username or password\"}");
-                            response.getWriter().flush();
+
+                            response.getWriter().write("""
+                                    {
+                                      "success": false,
+                                      "message": "Invalid username or password"
+                                    }
+                                    """);
                         })
+
                         .permitAll()
                 )
 
-                // CẤU HÌNH ĐĂNG XUẤT
                 .logout(logout -> logout
                         .logoutUrl("/logout")
-                        .logoutSuccessUrl("/login")
+                        .logoutSuccessHandler((request, response, authentication) -> {
+                            response.setStatus(HttpServletResponse.SC_OK);
+                            response.setContentType("application/json;charset=UTF-8");
+
+                            response.getWriter().write("""
+                                    {
+                                      "success": true,
+                                      "message": "Logout successful"
+                                    }
+                                    """);
+                        })
                 );
 
         return http.build();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+
+        CorsConfiguration configuration = new CorsConfiguration();
+
+        configuration.setAllowedOrigins(List.of(
+                "https://exam-web-git-main-tieu-cao-s-projects.vercel.app"
+        ));
+
+        configuration.setAllowedMethods(List.of(
+                "GET",
+                "POST",
+                "PUT",
+                "DELETE",
+                "PATCH",
+                "OPTIONS"
+        ));
+
+        configuration.setAllowedHeaders(List.of("*"));
+
+        configuration.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source =
+                new UrlBasedCorsConfigurationSource();
+
+        source.registerCorsConfiguration("/**", configuration);
+
+        return source;
     }
 
     @Bean
