@@ -1,20 +1,36 @@
 package com.exam.exam_web;
 
+import com.exam.exam_web.entity.Account;
+import com.exam.exam_web.entity.Role;
+import com.exam.exam_web.repository.AccountRepository;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @SpringBootApplication
 public class ExamWebApplication {
 
-    public static void main(String[] args) {
-        ApplicationContext context = SpringApplication.run(ExamWebApplication.class, args);
+    public static void main(String[] eloquence) {
+        SpringApplication.run(ExamWebApplication.class, eloquence);
+    }
 
-        // 💡 TUYỆT CHIÊU: Lấy chính bộ mã hóa trong cấu hình để tự băm chuỗi "123"
-        PasswordEncoder encoder = context.getBean(PasswordEncoder.class);
-        System.out.println("\n=======================================================");
-        System.out.println("CHUỖI BĂM CHUẨN CỦA MÁY BẠN: " + encoder.encode("123"));
-        System.out.println("=======================================================\n");
+    @Bean
+    CommandLineRunner initDatabase(AccountRepository accountRepository, PasswordEncoder passwordEncoder) {
+        return args -> {
+            // Nếu chưa có tài khoản admin, tự động tạo mới
+            if (accountRepository.findByUsername("admin").isEmpty()) {
+                Account admin = Account.builder()
+                        .username("admin")
+                        .passwordHash(passwordEncoder.encode("123")) // Mật khẩu của bạn
+                        .email("admin@iuh.edu.vn")
+                        .role(Role.ADMIN) // Hoặc Role tương ứng của bạn: TEACHER, STUDENT
+                        .active(true)
+                        .build();
+                accountRepository.save(admin);
+                System.out.println("====== ĐÃ TẠO TÀI KHOẢN MỒI THÀNH CÔNG: admin / admin123 ======");
+            }
+        };
     }
 }

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import './Login.css'; // 💡 Import file CSS tách biệt
+import './Login.css';
 
 export default function Login() {
     const [username, setUsername] = useState('');
@@ -17,11 +17,17 @@ export default function Login() {
         formData.append('username', username);
         formData.append('password', password);
 
+        // TỰ ĐỘNG ĐỊNH TUYẾN: Nếu chạy production (Vercel) thì trỏ thẳng về Render, local thì dùng Proxy
+        const isProd = import.meta.env.PROD;
+        const targetUrl = isProd
+            ? 'https://exam-web-0jf4.onrender.com/login'
+            : '/login';
+
         try {
-            const response = await fetch('/login', {
+            const response = await fetch(targetUrl, {
                 method: 'POST',
                 headers: {
-                    // 💡 ĐỒNG BỘ: Ép cả 2 nhận diện để Spring Boot không thể bắt hụt tín hiệu Ajax
+                    // ĐỒNG BỘ: Ép cả 2 nhận diện để Spring Boot không thể bắt hụt tín hiệu Ajax
                     'Accept': 'application/json',
                     'X-Requested-With': 'XMLHttpRequest'
                 },
@@ -43,6 +49,8 @@ export default function Login() {
         } catch (error) {
             console.error("Lỗi kết nối nghiêm trọng:", error);
             setErrorMsg('Không thể kết nối đến máy chủ.');
+        } finally {
+            setLoading(false); // 💡 Tắt trạng thái loading để có thể bấm lại nếu sai mật khẩu
         }
     };
 

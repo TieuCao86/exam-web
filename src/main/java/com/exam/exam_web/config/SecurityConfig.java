@@ -54,42 +54,21 @@ public class SecurityConfig {
                         .usernameParameter("username")
                         .passwordParameter("password")
 
-                                // 💡 CẬP NHẬT TRONG SUCCESS HANDLER:
-                                .successHandler((request, response, authentication) -> {
-                                    String acceptHeader = request.getHeader("Accept");
-                                    String xRequestedWith = request.getHeader("X-Requested-With");
+                        // 💡 ĐÃ SỬA: Thành công là trả về JSON 200 luôn, không nhảy trang
+                        .successHandler((request, response, authentication) -> {
+                            response.setStatus(jakarta.servlet.http.HttpServletResponse.SC_OK);
+                            response.setContentType("application/json;charset=UTF-8");
+                            response.getWriter().write("{\"success\": true, \"message\": \"Login successful\"}");
+                            response.getWriter().flush();
+                        })
 
-                                    // Nới lỏng điều kiện: Chỉ cần một trong các dấu hiệu từ React/Ajax xuất hiện là duyệt luôn
-                                    if ((acceptHeader != null && acceptHeader.contains("application/json"))
-                                            || "XMLHttpRequest".equals(xRequestedWith)
-                                            || request.getRequestURI().contains("/api")) {
-
-                                        response.setStatus(jakarta.servlet.http.HttpServletResponse.SC_OK);
-                                        response.setContentType("application/json;charset=UTF-8");
-                                        response.getWriter().write("{\"success\": true, \"message\": \"Login successful\"}");
-                                        response.getWriter().flush();
-                                    } else {
-                                        new RoleBasedSuccessHandler().onAuthenticationSuccess(request, response, authentication);
-                                    }
-                                })
-
-// 💡 CẬP NHẬT TRONG FAILURE HANDLER:
-                                .failureHandler((request, response, exception) -> {
-                                    String acceptHeader = request.getHeader("Accept");
-                                    String xRequestedWith = request.getHeader("X-Requested-With");
-
-                                    if ((acceptHeader != null && acceptHeader.contains("application/json"))
-                                            || "XMLHttpRequest".equals(xRequestedWith)
-                                            || request.getRequestURI().contains("/api")) {
-
-                                        response.setStatus(jakarta.servlet.http.HttpServletResponse.SC_UNAUTHORIZED);
-                                        response.setContentType("application/json;charset=UTF-8");
-                                        response.getWriter().write("{\"success\": false, \"message\": \"Invalid username or password\"}");
-                                        response.getWriter().flush();
-                                    } else {
-                                        response.sendRedirect("/login?error");
-                                    }
-                                })
+                        // 💡 ĐÃ SỬA: Thất bại là trả về JSON 401 Unauthorized luôn, không Redirect đi đâu hết
+                        .failureHandler((request, response, exception) -> {
+                            response.setStatus(jakarta.servlet.http.HttpServletResponse.SC_UNAUTHORIZED);
+                            response.setContentType("application/json;charset=UTF-8");
+                            response.getWriter().write("{\"success\": false, \"message\": \"Invalid username or password\"}");
+                            response.getWriter().flush();
+                        })
                         .permitAll()
                 )
 
