@@ -1,0 +1,72 @@
+/* ── 1. BỘ LỌC VÀ TÌM KIẾM (ACTION BAR / FILTER FORM) ── */
+.horizontal-filter-form {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+/* Input & Select đồng bộ */
+.horizontal-filter-form input,
+.horizontal-filter-form select {
+    height: 38px;
+    padding: 0 12px;
+    border: 1px solid rgba(0,0,0,0.15);
+    border-radius: var(--radius-control);
+    font-size: 13px;
+    outline: none;
+    background: #fff;
+    color: #333;
+    transition: all 0.2s ease;
+}
+
+.horizontal-filter-form input:focus,
+.horizontal-filter-form select:focus {
+    border-color: var(--app-btn-blue);
+    box-shadow: 0 0 0 3px rgba(74,108,247,0.15);
+}
+
+/* Tỷ lệ co giãn */
+.horizontal-filter-form input { flex: 2; min-width: 180px; }
+.horizontal-filter-form select { flex: 1; min-width: 140px; }
+
+/* ── 2. HỆ THỐNG NÚT BẤM (BUTTONS) ── */
+/* Nút Submit xanh chuẩn UI chính */
+.btn-primary-blue {
+    height: 38px;
+    padding: 0 16px;
+    border: none;
+    border-radius: var(--radius-control);
+    background: var(--app-btn-blue);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.btn-primary-blue:hover { background: var(--app-btn-blue-hover); }
+
+/* Nút điều hướng mũi tên (Nav Arrows) */
+.nav-arrows-group {
+    display: flex;
+    gap: 8px;
+}
+.nav-arrow-btn {
+    background: #fff;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.nav-arrow-btn:hover { background: #f0f0f0; }
+
+/* Responsive bộ lọc */
+@media (max-width: 768px) {
+    .horizontal-filter-form { flex-direction: column; }
+    .horizontal-filter-form input,
+    .horizontal-filter-form select,
+    .btn-primary-blue { width: 100%; }
+}

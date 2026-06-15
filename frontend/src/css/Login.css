@@ -1,28 +1,15 @@
-/* ── HỆ THỐNG BIẾN MÀU THƯƠNG HIỆU ĐỒNG BỘ ── */
-:root {
-    --bg-login:       #eeecdd;
-    --panel-left:     #d9d9d9;
-    --primary-color:  #1E424D;
-    --btn-color:      #1E424D;
-    --btn-hover:      #142d34;
-    --accent-color:   #DDB248;
-    --error-color:    #e74c3c;
-    --radius-panel:   28px;
-}
-
 .login-layout {
     display: flex;
     width: 100%;
     min-height: 100vh;
     padding: 20px;
-    background: var(--bg-login);
-    font-family: 'Inter', sans-serif;
+    background: var(--login-bg);
 }
 
-/* ── PANEL TRÁI: LOGO BẤT ĐỐI XỨNG ── */
+/* ── PANEL TRÁI ── */
 .login-left-panel {
     flex: 1;
-    background: var(--panel-left);
+    background: var(--login-panel);
     border-radius: var(--radius-panel);
     display: flex;
     align-items: center;
@@ -37,7 +24,7 @@
     display: block;
 }
 
-/* ── PANEL PHẢI: FORM ĐĂNG NHẬP ── */
+/* ── PANEL PHẢI ── */
 .login-right-panel {
     flex: 1;
     display: flex;
@@ -53,7 +40,7 @@
     font-family: 'Raleway', sans-serif;
     font-size: 40px;
     font-weight: 800;
-    color: var(--primary-color);
+    color: var(--login-primary);
     letter-spacing: 4px;
     align-self: flex-start;
     width: 100%;
@@ -68,7 +55,7 @@
     gap: 24px;
 }
 
-/* ── INPUTS (UNDERLINE STYLE SYSTEM) ── */
+/* ── INPUTS (UNDERLINE STYLE) ── */
 .login-field-group {
     width: 100%;
     display: flex;
@@ -79,25 +66,18 @@
     width: 100%;
     background: transparent;
     border: none;
-    border-bottom: 2px solid var(--primary-color);
+    border-bottom: 2px solid var(--login-primary);
     outline: none;
-    font-family: 'Inter', sans-serif;
     font-size: 16px;
     color: #333;
     padding: 10px 2px;
     transition: border-color 0.2s;
 }
 
-.login-field-group input::placeholder {
-    color: #888;
-    font-size: 15px;
-}
+.login-field-group input::placeholder { color: #888; font-size: 15px; }
+.login-field-group input:focus { border-bottom-color: var(--login-accent); }
 
-.login-field-group input:focus {
-    border-bottom-color: var(--accent-color); /* Đổi màu sang vàng nghệ khi click */
-}
-
-/* ── THÔNG BÁO LỖI UX HEURISTICS ── */
+/* ── ERROR UX ── */
 .login-error-label {
     width: 100%;
     max-width: 420px;
@@ -109,10 +89,10 @@
     border-left: 4px solid var(--error-color);
 }
 
-/* ── NÚT BẤM (BUTTON) ── */
+/* ── BUTTON LOGIN ── */
 .login-submit-btn {
     width: 100%;
-    background: var(--btn-color);
+    background: var(--login-btn);
     color: #fff;
     font-family: 'Raleway', sans-serif;
     font-size: 17px;
@@ -124,35 +104,24 @@
     cursor: pointer;
     transition: background 0.2s, transform 0.1s;
 }
+.login-submit-btn:hover:not(:disabled) { background: var(--login-btn-hover); }
+.login-submit-btn:active:not(:disabled) { transform: scale(0.98); }
+.login-submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
-.login-submit-btn:hover:not(:disabled) {
-    background: var(--btn-hover);
-}
-
-.login-submit-btn:active:not(:disabled) {
-    transform: scale(0.98);
-}
-
-.login-submit-btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
-/* ── HIỆU ỨNG CHUYỂN ĐỘNG (ANIMATIONS) ── */
+/* ── ANIMATIONS ── */
 @keyframes loginFadeInLeft {
     from { opacity: 0; transform: translateX(-24px); }
     to   { opacity: 1; transform: translateX(0); }
 }
-
 @keyframes loginFadeInRight {
     from { opacity: 0; transform: translateX(24px); }
     to   { opacity: 1; transform: translateX(0); }
 }
 
-/* ── THÍCH ỨNG TRÌNH DUYỆT (RESPONSIVE) ── */
+/* ── RESPONSIVE ── */
 @media (max-width: 700px) {
-    .login-layout        { flex-direction: column; padding: 12px; }
-    .login-left-panel    { min-height: 220px; flex: none; border-radius: 20px; }
-    .login-right-panel   { padding: 40px 24px; }
-    .login-title         { font-size: 30px; }
+    .login-layout { flex-direction: column; padding: 12px; }
+    .login-left-panel { min-height: 220px; flex: none; border-radius: 20px; }
+    .login-right-panel { padding: 40px 24px; }
+    .login-title { font-size: 30px; }
 }

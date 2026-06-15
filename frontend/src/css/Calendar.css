@@ -1,0 +1,112 @@
+.weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--app-bg-main); /* Đồng bộ theo biến màu cam mới của bạn */
+    border-bottom: 2px solid #e0e0e0;
+    padding-bottom: 8px;
+}
+
+.days-grid {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.calendar-row {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    border-bottom: 1px solid #ddd;
+}
+
+.day-cell {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: 8px;
+    border-right: 1px solid #ddd;
+    min-height: 140px;
+    overflow: visible;
+}
+
+/* Bỏ border bên phải cho ô cuối cùng của mỗi hàng để giao diện mượt hơn */
+.day-cell:last-child {
+    border-right: none;
+}
+
+.day-number {
+    align-self: flex-end;
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.events {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.event {
+    font-size: 12px;
+    background: #ed8772;
+    color: white;
+    border-radius: 6px;
+    padding: 4px 6px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.more-event {
+    font-size: 12px;
+    color: #666;
+    cursor: pointer;
+}
+
+/* ── POPUP CHI TIẾT SỰ KIỆN ── */
+.event-popup {
+    position: absolute;
+    top: 10px;
+    left: calc(100% + 10px);
+    width: 260px;
+    background: white;
+    border-radius: 12px;
+    padding: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, .15);
+    opacity: 0;
+    visibility: hidden;
+    transition: .2s ease;
+    z-index: 9999;
+    color: #333; /* Đảm bảo chữ trong popup đọc được rõ ràng */
+    text-align: left;
+}
+
+.event-popup div {
+    padding: 4px 0;
+    border-bottom: 1px dashed #eee;
+}
+
+.event-popup div:last-child {
+    border-bottom: none;
+}
+
+.day-cell:hover .event-popup {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* ── TRẠNG THÁI ACTIVE-DAY (HÌNH TRÒN ĐẬM) ── */
+.active-day .day-number span {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--app-bg-main); /* Sử dụng biến màu chủ đạo hệ thống */
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

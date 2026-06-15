@@ -1,0 +1,68 @@
+/* Khung bọc toàn bộ ứng dụng */
+.app-container {
+    display: flex;
+    gap: 20px;
+    height: 100vh;
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Phần thảm chính chứa nội dung (Màu cam) */
+.main-content-wrapper {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: 30px;
+    background: var(--app-bg-main);
+    min-height: 0;
+    border-radius: 20px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    overflow: hidden; /* Khóa cuộn để nhường quyền cho content-card */
+}
+
+/* Khung đệm cấu trúc trang con */
+.page-container {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    gap: 16px;
+    width: 100%;
+}
+
+/* Header trang (Tiêu đề + nút điều hướng) */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    flex-shrink: 0;
+}
+
+.page-header h2 {
+    font-family: 'Raleway', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: #fff;
+    margin: 0;
+}
+
+/* Content Card - Bo tròn màu kem chứa dữ liệu */
+.content-card {
+    flex: 1;
+    background: var(--app-bg-card);
+    border-radius: var(--radius-card);
+    padding: 24px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+    min-height: 0;
+    overflow-y: auto;
+}
+
+/* Phân trang (Pagination) hông bị méo */
+.pagination-wrapper {
+    margin-top: 4px;
+    text-align: center;
+    flex-shrink: 0;
+}
+

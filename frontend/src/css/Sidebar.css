@@ -1,6 +1,6 @@
 .sidebar {
     width: 350px;
-    background: var(--primary-color); /* Đảm bảo bạn đã định nghĩa biến này ở :root */
+    background: var(--app-bg-main); /* Đảm bảo bạn đã định nghĩa biến này ở :root */
     border-radius: 30px;
 
     display: flex;

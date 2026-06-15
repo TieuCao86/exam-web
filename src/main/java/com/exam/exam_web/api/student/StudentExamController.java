@@ -13,7 +13,10 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/student/exams")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = {
+        "http://localhost:5173",
+        "https://exam-web-sigma.vercel.app"
+})
 public class StudentExamController {
 
     private final ExamService examService;

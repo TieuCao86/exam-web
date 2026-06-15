@@ -1,0 +1,52 @@
+/* ── 1. PHÔNG CHỮ & RESET CHUNG ── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Raleway:wght@700;800&display=swap');
+
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── 2. HỆ THỐNG BIẾN TOÀN CỤC (GLOBAL VARIABLES) ── */
+:root {
+    /* Token màu cho Layout chính (Tone Cam) */
+    --app-bg-main:     #ed8772;
+    --app-bg-card:     #e8e4d8;
+    --app-btn-blue:    #4a6cf7;
+    --app-btn-blue-hover: #3b5bdb;
+
+    /* Token màu cho Layout Login (Tone Xanh - Vàng nghệ) */
+    --login-bg:        #eeecdd;
+    --login-panel:     #d9d9d9;
+    --login-primary:   #1E424D;
+    --login-btn:       #1E424D;
+    --login-btn-hover: #142d34;
+    --login-accent:    #DDB248;
+
+    /* Hệ thống lỗi & Bo góc dùng chung */
+    --error-color:     #e74c3c;
+    --radius-panel:    28px;
+    --radius-card:     24px;
+    --radius-control:  10px;
+}
+
+/* ── 3. TIỆN ÍCH KHỬ THANH CUỘN (SCROLLBAR UTILITIES) ── */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
