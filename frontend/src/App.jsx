@@ -5,7 +5,6 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Login from "./pages/Login";
 import Calendar from "./pages/Calendar";
 import CoursePage from "./pages/CoursePage";
-import Forbidden from "./pages/Forbidden";
 
 function App() {
 
@@ -18,8 +17,6 @@ function App() {
         <Routes>
 
             <Route path="/login" element={<Login />} />
-
-            <Route path="/403" element={<Forbidden />} />
 
             <Route
                 path="/"

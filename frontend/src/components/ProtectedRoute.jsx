@@ -1,21 +1,22 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
-    // Giả sử bạn lưu thông tin user sau khi login vào localStorage
-    const user = JSON.parse(localStorage.getItem('user'));
+    const { user, isAuthenticated } = useAuth();
 
-    if (!user) {
-        // Nếu chưa đăng nhập, đá về trang login
+    console.log("PROTECTED ROUTE CHECKING. User:", user);
+
+    // 1. Kiểm tra đăng nhập
+    if (!isAuthenticated) {
         return <Navigate to="/login" replace />;
     }
 
-    if (allowedRoles && !allowedRoles.includes(user.role)) {
-        // Nếu sai Role (ví dụ Học sinh đòi vào trang Giáo viên), đá về trang không có quyền
+    // 2. Kiểm tra phân quyền
+    if (allowedRoles && !allowedRoles.includes(user?.role)) {
         return <Navigate to="/403" replace />;
     }
 
-    // Nếu thỏa mãn hết thì cho đi tiếp vào trang con
     return children;
 };
 

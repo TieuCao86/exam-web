@@ -6,12 +6,6 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      // 💡 CẤU HÌNH MẠNH MẼ: Bắt trọn gói endpoint /login bất kể GET/POST hay Form data
-      '/login': {
-        target: 'http://localhost:8080',
-        changeOrigin: true,
-        secure: false,
-      },
       '/api': {
         target: 'http://localhost:8080',
         changeOrigin: true,

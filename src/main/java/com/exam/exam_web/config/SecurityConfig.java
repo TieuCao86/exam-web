@@ -1,11 +1,13 @@
 package com.exam.exam_web.config;
 
+import com.exam.exam_web.services.CustomUserDetails;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -82,12 +84,29 @@ public class SecurityConfig {
                             response.setStatus(HttpServletResponse.SC_OK);
                             response.setContentType("application/json;charset=UTF-8");
 
-                            response.getWriter().write("""
-                                    {
-                                      "success": true,
-                                      "message": "Login successful"
-                                    }
-                                    """);
+                            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+
+                            String userId = userDetails.getId(); // Lấy được ID thật dưới DB!
+                            String username = userDetails.getUsername();
+
+                            // Lấy Role sạch (Ví dụ: STUDENT)
+                            String role = userDetails.getAuthorities().stream()
+                                    .map(GrantedAuthority::getAuthority)
+                                    .findFirst()
+                                    .orElse("ROLE_STUDENT")
+                                    .replace("ROLE_", "");
+
+                            String jsonResponse = String.format("""
+                            {
+                              "success": true,
+                              "message": "Login successful",
+                              "id": "%s",
+                              "username": "%s",
+                              "role": "%s"
+                            }
+                            """, userId, username, role);
+
+                            response.getWriter().write(jsonResponse);
                         })
 
                         .failureHandler((request, response, exception) -> {
