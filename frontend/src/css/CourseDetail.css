@@ -1,0 +1,153 @@
+/* =====================================================================
+   BỐ CỤC CHUNG (COURSE DETAIL LAYOUT)
+   ===================================================================== */
+.course-detail-layout {
+    display: flex;
+    gap: 20px;
+    height: 100%;
+}
+
+/* =====================================================================
+   PANEL TRÁI - THANH ĐIỀU HƯỚNG NỘI DUNG (OUTLINE PANEL)
+   ===================================================================== */
+.outline-panel {
+    width: 320px;
+    flex-shrink: 0;
+    background: #f3eee4;
+    border-radius: 18px;
+    padding: 18px;
+    overflow-y: auto;
+}
+
+.outline-panel h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 16px;
+    font-weight: 700;
+    color: #333;
+}
+
+.chapter-item {
+    background: #e7dfcf;
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #333;
+    transition: background 0.2s ease;
+}
+
+.chapter-item.active {
+    background: #dfd4be;
+}
+
+.chapter-item:hover {
+    background: #dfd4be;
+}
+
+.lesson-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 0 10px 15px;
+}
+
+.lesson-list a {
+    color: #333;
+    text-decoration: none;
+    padding: 8px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    transition: background 0.2s ease;
+}
+
+.lesson-list a:hover {
+    background: #ececec;
+}
+
+/* =====================================================================
+   PANEL PHẢI - CHI TIẾT BÀI KIỂM TRA (DETAIL PANEL)
+   ===================================================================== */
+.detail-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    overflow-y: auto;
+}
+
+.section-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #b07b3a;
+    margin-bottom: 4px;
+}
+
+.exam-item {
+    background: white;
+    border-radius: 14px;
+    padding: 18px;
+    border: 1px solid #ddd;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.exam-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.exam-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    background: #c2185b;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.exam-header small {
+    font-size: 11px;
+    font-weight: 600;
+    color: #888;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 2px;
+}
+
+.exam-header h4 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+}
+
+.exam-body {
+    margin-top: 12px;
+    background: #f7f7f7;
+    border-radius: 10px;
+    padding: 12px;
+    font-size: 14px;
+    color: #555;
+    line-height: 1.5;
+}
+
+.exam-footer {
+    margin-top: 10px;
+    color: #666;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}

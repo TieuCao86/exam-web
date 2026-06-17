@@ -1,7 +1,9 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext'; // 1. Import AuthContext
 import '../css/Sidebar.css';
 
-// ── SUB-COMPONENT: Tương đương với th:fragment="item" ngày xưa ──
+// ── SUB-COMPONENT: Menu Item ──
 const MenuItem = ({ url, iconClass, text, active }) => {
     return (
         <a
@@ -15,13 +17,35 @@ const MenuItem = ({ url, iconClass, text, active }) => {
 };
 
 // ── COMPONENT CHÍNH: Sidebar ──
-const Sidebar = ({ menus = [], currentPath, userName, userRole }) => {
+const Sidebar = ({ menus = [], currentPath }) => {
+    const navigate = useNavigate();
+    const { user, logout } = useAuth(); // 2. Lấy thông tin user và hàm logout từ Context
 
     const renderRoleText = (role) => {
         switch (role) {
             case 'STUDENT': return 'Thí sinh';
             case 'TEACHER': return 'Giáo viên';
             default: return 'Quản trị viên';
+        }
+    };
+
+    // 3. Hàm xử lý Đăng xuất đồng bộ với Backend
+    const handleLogout = async () => {
+        const isProd = import.meta.env.PROD;
+        const BASE_URL = isProd ? 'https://exam-web-0jf4.onrender.com' : 'http://localhost:8080';
+
+        try {
+            // Gọi API báo cho Spring Security hủy Session
+            await fetch(`${BASE_URL}/logout`, {
+                method: 'POST',
+                credentials: 'include'
+            });
+        } catch (error) {
+            console.error("Lỗi khi gọi API logout:", error);
+        } finally {
+            // Dù API có lỗi hay không thì vẫn xóa sạch State ở Frontend và đẩy về trang Login
+            logout();
+            navigate('/login');
         }
     };
 
@@ -39,9 +63,9 @@ const Sidebar = ({ menus = [], currentPath, userName, userRole }) => {
                         <MenuItem
                             key={index}
                             url={menu.url}
-                            iconClass={menu.icon} // Bản cũ truyền icon qua biến menu.icon
+                            iconClass={menu.icon}
                             text={menu.text}
-                            active={menu.url === currentPath} // Tự động tính toán trạng thái active
+                            active={menu.url === currentPath}
                         />
                     ))}
                 </nav>
@@ -53,11 +77,17 @@ const Sidebar = ({ menus = [], currentPath, userName, userRole }) => {
                     <i className="far fa-user-circle avatar-icon"></i>
 
                     <div className="user-info">
-                        <h4>{userName || 'TÊN NGƯỜI DÙNG'}</h4>
-                        <span>{renderRoleText(userRole)}</span>
+                        {/* 4. Lấy dữ liệu tên và role thật từ Context tự động cập nhật */}
+                        <h4>{user?.username || 'CHƯA ĐĂNG NHẬP'}</h4>
+                        <span>{renderRoleText(user?.role)}</span>
                     </div>
 
-                    <i className="fas fa-cog settings-icon"></i>
+                    {/* 5. Icon Logout gán sự kiện click */}
+                    <i
+                        className="fas fa-book logout-icon"
+                        title="Đăng xuất"
+                        onClick={handleLogout}
+                    />
                 </div>
             </div>
         </aside>

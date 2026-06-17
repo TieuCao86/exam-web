@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import CourseList from "../components/CourseList";
+import {useAuth} from "../context/AuthContext.jsx";
 
 const API_BASE = import.meta.env.PROD
     ? "https://exam-web-0jf4.onrender.com"
@@ -11,22 +12,34 @@ export default function CoursePage() {
     const [currentPage, setCurrentPage] = useState(0);
     const [hasNext, setHasNext] = useState(false);
 
+    const { user } = useAuth();
+
     const loadCourses = async (page = 0) => {
 
         try {
-
             const response = await fetch(
-                `${API_BASE}/api/student/courses/page?userId=STUDENT001&page=${page}`
+                `${API_BASE}/api/student/courses/page?userId=${user.id}&page=${page}`,
+                {
+                    method: 'GET',
+                    credentials: 'include',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                }
             );
+
+            if (!response.ok) {
+                throw new Error(`Server returned status ${response.status}`);
+            }
 
             const data = await response.json();
 
-            setCourses(data.content);
-            setCurrentPage(data.currentPage);
-            setHasNext(data.hasNext);
-
+            setCourses(data.content || []);
+            setCurrentPage(data.pageNumber);
+            setHasNext(!data.last);
         } catch (error) {
-            console.error(error);
+            console.error("Lỗi khi tải danh sách khóa học:", error);
         }
     };
 

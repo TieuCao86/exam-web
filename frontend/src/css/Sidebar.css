@@ -71,7 +71,6 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-
     color: white;
 }
 
@@ -94,7 +93,15 @@
     font-size: 14px;
 }
 
-.settings-icon {
-    font-size: 24px;
+/* 🌟 CẬP NHẬT LẠI ĐOẠN NÀY ĐỂ HIỂN THỊ NÚT ĐĂNG XUẤT TO, RÕ, ĐẸP */
+.logout-icon {
+    font-size: 24px;       /* Tăng kích thước bằng cụm settings cũ */
+    color: white;          /* Mặc định cho màu trắng nổi bật trên nền nền tối */
     cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.logout-icon:hover {
+    color: #e74c3c;        /* Đổi sang màu đỏ rực khi hover chuột */
+    transform: scale(1.15); /* Hiệu ứng phóng to nhẹ thích mắt */
 }

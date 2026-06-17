@@ -5,6 +5,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Login from "./pages/Login";
 import Calendar from "./pages/Calendar";
 import CoursePage from "./pages/CoursePage";
+import CourseDetailPage from "./pages/CourseDetailPage.jsx";
 
 function App() {
 
@@ -40,6 +41,17 @@ function App() {
                     <ProtectedRoute allowedRoles={["STUDENT"]}>
                         <MainLayout menus={mockMenus} currentPath="/courses">
                             <CoursePage />
+                        </MainLayout>
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/courses/:courseId"
+                element={
+                    <ProtectedRoute allowedRoles={["STUDENT"]}>
+                        <MainLayout menus={mockMenus}>
+                            <CourseDetailPage />
                         </MainLayout>
                     </ProtectedRoute>
                 }

@@ -32,4 +32,17 @@ public class StudentCourseController {
     public List<CourseDTO> getCoursesByStudent(@RequestParam String userId) {
         return courseService.findByUser(userId);
     }
+
+    @GetMapping("/{courseId}")
+    public ResponseEntity<CourseDTO> getCourseDetail(
+            @PathVariable String courseId
+    ) {
+        CourseDTO course = courseService.findById(courseId);
+
+        if (course == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(course);
+    }
 }

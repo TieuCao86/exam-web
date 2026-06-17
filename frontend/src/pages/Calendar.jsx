@@ -22,12 +22,45 @@ const Calendar = ({ currentMonthYear, calendarDays }) => {
         const BASE_URL = isProd ? 'https://exam-web-0jf4.onrender.com' : 'http://localhost:8080';
 
         setLoading(true);
+
         Promise.all([
-            fetch(`${BASE_URL}/api/student/exams/available/page?userId=${userId}&page=0`).then(res => res.json()),
-            fetch(`${BASE_URL}/api/student/exams/upcoming/page?userId=${userId}&page=0`).then(res => res.json())
+            fetch(
+                `${BASE_URL}/api/student/exams/available/page?userId=${userId}&page=0`,
+                {
+                    credentials: 'include',
+                    headers: {
+                        Accept: 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                }
+            ).then(res => {
+                if (!res.ok) throw new Error("Available API: " + res.status);
+                return res.json();
+            }),
+
+            fetch(
+                `${BASE_URL}/api/student/exams/upcoming/page?userId=${userId}&page=0`,
+                {
+                    credentials: 'include',
+                    headers: {
+                        Accept: 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                }
+            ).then(res => {
+                if (!res.ok) throw new Error("Upcoming API: " + res.status);
+                return res.json();
+            })
         ])
             .then(([availableRes, upcomingRes]) => {
-                setExams([...(availableRes.content || []), ...(upcomingRes.content || [])]);
+                console.log("AVAILABLE", availableRes);
+                console.log("UPCOMING", upcomingRes);
+
+                setExams([
+                    ...(availableRes.content || []),
+                    ...(upcomingRes.content || [])
+                ]);
+
                 setLoading(false);
             })
             .catch(err => {

@@ -27,47 +27,35 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
 
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.setContentType("application/json;charset=UTF-8");
+                            response.getWriter().write("{\"error\": \"Unauthorized\", \"message\": \"Session expired or missing credentials.\"}");
+                        })
+                )
+
                 .authorizeHttpRequests(auth -> auth
 
-                        // Cho phép preflight request
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                        // Login + static resources
                         .requestMatchers(
                                 "/login",
+                                "/images/**",
                                 "/css/**",
-                                "/js/**",
-                                "/images/**"
+                                "/js/**"
                         ).permitAll()
 
-                        // API public
-                        .requestMatchers(
-                                "/api/exams/**",
-                                "/api/courses/**",
-                                "/api/teacher/questions/**"
-                        ).permitAll()
+                        .requestMatchers("/api/debug").permitAll()
 
-                        .requestMatchers("/api/**").permitAll()
+                        .requestMatchers("/api/student/**")
+                        .hasRole("STUDENT")
 
-                        // API teacher
                         .requestMatchers("/api/teacher/**")
                         .hasAnyRole("TEACHER", "ADMIN")
 
-                        // MVC pages
-                        .requestMatchers("/students/**")
+                        .requestMatchers("/api/admin/**")
                         .hasRole("ADMIN")
-
-                        .requestMatchers("/questions/**")
-                        .hasRole("TEACHER")
-
-                        .requestMatchers("/calendar/**")
-                        .hasRole("STUDENT")
-
-                        .requestMatchers(
-                                "/courses/**",
-                                "/exams/**",
-                                "/history/**"
-                        ).authenticated()
 
                         .anyRequest().authenticated()
                 )
@@ -95,6 +83,10 @@ public class SecurityConfig {
                                     .findFirst()
                                     .orElse("ROLE_STUDENT")
                                     .replace("ROLE_", "");
+
+                            System.out.println("LOGIN SESSION = " + request.getSession().getId());
+                            System.out.println("AUTH = " + authentication);
+                            System.out.println("AUTHORITIES = " + authentication.getAuthorities());
 
                             String jsonResponse = String.format("""
                             {
