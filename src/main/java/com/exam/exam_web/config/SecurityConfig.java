@@ -139,11 +139,13 @@ public class SecurityConfig {
 
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedOriginPatterns(List.of(
-                "https://*.vercel.app",
+        configuration.setAllowedOrigins(List.of(
+                "https://exam-web-sigma.vercel.app",
                 "http://localhost:5173",
                 "http://localhost:3000"
         ));
+
+        configuration.setAllowCredentials(true);
 
         configuration.setAllowedMethods(List.of("*"));
         configuration.setAllowedHeaders(List.of("*"));
