@@ -1,0 +1,108 @@
+.detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+}
+
+.info-box-column h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.instruction-list {
+    white-space: pre-line;
+    color: #555;
+    line-height: 1.6;
+    font-size: 14px;
+}
+
+.status-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    font-size: 14px;
+    border-bottom: 1px dashed #eee;
+    padding-bottom: 8px;
+    color: #333;
+}
+
+.status-row span {
+    color: #666;
+}
+
+.upload-box {
+    border: 2px dashed #ccc;
+    border-radius: 10px;
+    padding: 30px;
+    text-align: center;
+    margin-bottom: 20px;
+    background: #fafafa;
+}
+
+.upload-box input[type="file"] {
+    cursor: pointer;
+}
+
+.btn-submit {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    transition: opacity 0.2s;
+}
+
+.btn-submit:hover {
+    opacity: .9;
+}
+
+.btn-submit:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+/* TABLE CẤU TRÚC LẦN LÀM BÀI */
+.attempt-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+.attempt-table th,
+.attempt-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+    font-size: 14px;
+}
+
+.attempt-table th {
+    background: #f8f9fa;
+    color: #333;
+    font-weight: 600;
+}
+
+.attempt-table td {
+    color: #333;
+}
+
+.btn-review-link {
+    background: none;
+    border: none;
+    color: #4a6cf7;
+    cursor: pointer;
+    font-weight: 600;
+    text-decoration: underline;
+    font-size: 14px;
+    padding: 0;
+}
+
+.btn-review-link:hover {
+    color: #2747c4;
+}

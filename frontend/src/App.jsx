@@ -6,12 +6,15 @@ import Login from "./pages/Login";
 import Calendar from "./pages/Calendar";
 import CoursePage from "./pages/CoursePage";
 import CourseDetailPage from "./pages/CourseDetailPage.jsx";
+import ExamListPage from "./pages/ExamListPage.jsx";
+import ExamDetailPage from "./pages/ExamDetailPage.jsx";
 
 function App() {
 
     const mockMenus = [
         { url: "/calendar", icon: "fas fa-calendar-alt", text: "Lịch học" },
-        { url: "/courses", icon: "fas fa-book", text: "Khóa học" }
+        { url: "/courses", icon: "fas fa-book", text: "Khóa học" },
+        { url: "/exams", icon: "fas fa-file-alt", text: "Bài kiểm tra" }
     ];
 
     return (
@@ -52,6 +55,28 @@ function App() {
                     <ProtectedRoute allowedRoles={["STUDENT"]}>
                         <MainLayout menus={mockMenus}>
                             <CourseDetailPage />
+                        </MainLayout>
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/exams"
+                element={
+                    <ProtectedRoute allowedRoles={["STUDENT"]}>
+                        <MainLayout menus={mockMenus} currentPath="/exams">
+                            <ExamListPage />
+                        </MainLayout>
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/exams/:examId"
+                element = {
+                    <ProtectedRoute allowedRoles={["STUDENT"]}>
+                        <MainLayout menus={mockMenus} currentPath="/exams">
+                            <ExamDetailPage />
                         </MainLayout>
                     </ProtectedRoute>
                 }
