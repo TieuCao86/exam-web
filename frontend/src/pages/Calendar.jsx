@@ -5,7 +5,7 @@ import { useAuth } from "../context/AuthContext.jsx";
 
 const Calendar = ({ currentMonthYear, calendarDays }) => {
     const navigate = useNavigate();
-    const { user } = useAuth();
+    const { user, logout } = useAuth(); // Lấy thêm hàm logout từ Context để tự động clear session rác
     const [exams, setExams] = useState([]);
     const [loading, setLoading] = useState(true);
     const [errorMsg, setErrorMsg] = useState('');
@@ -22,7 +22,9 @@ const Calendar = ({ currentMonthYear, calendarDays }) => {
         const BASE_URL = isProd ? 'https://exam-web-0jf4.onrender.com' : 'http://localhost:8080';
 
         setLoading(true);
+        setErrorMsg('');
 
+        // Gọi song song 2 API lấy danh sách bài thi khả dụng và sắp diễn ra
         Promise.all([
             fetch(
                 `${BASE_URL}/api/student/exams/available/page?userId=${userId}&page=0`,
@@ -33,11 +35,7 @@ const Calendar = ({ currentMonthYear, calendarDays }) => {
                         'X-Requested-With': 'XMLHttpRequest'
                     }
                 }
-            ).then(res => {
-                if (!res.ok) throw new Error("Available API: " + res.status);
-                return res.json();
-            }),
-
+            ),
             fetch(
                 `${BASE_URL}/api/student/exams/upcoming/page?userId=${userId}&page=0`,
                 {
@@ -47,18 +45,29 @@ const Calendar = ({ currentMonthYear, calendarDays }) => {
                         'X-Requested-With': 'XMLHttpRequest'
                     }
                 }
-            ).then(res => {
-                if (!res.ok) throw new Error("Upcoming API: " + res.status);
-                return res.json();
-            })
+            )
         ])
-            .then(([availableRes, upcomingRes]) => {
-                console.log("AVAILABLE", availableRes);
-                console.log("UPCOMING", upcomingRes);
+            .then(async ([availableRes, upcomingRes]) => {
+                // CHẶN ĐỨT LỖI TREO GIAO DIỆN KHI RESTART SERVER BACKEND:
+                if (availableRes.status === 401 || availableRes.status === 403 || upcomingRes.status === 401) {
+                    console.warn("Phiên đăng nhập hết hạn do máy chủ khởi động lại. Tự động chuyển hướng...");
+                    logout(); // Xóa user khỏi localStorage và đưa trạng thái auth về null
+                    navigate('/login'); // Điều hướng ngay lập tức về trang đăng nhập
+                    return;
+                }
+
+                if (!availableRes.ok) throw new Error("Available API: " + availableRes.status);
+                if (!upcomingRes.ok) throw new Error("Upcoming API: " + upcomingRes.status);
+
+                const availableData = await availableRes.json();
+                const upcomingData = await upcomingRes.json();
+
+                console.log("AVAILABLE", availableData);
+                console.log("UPCOMING", upcomingData);
 
                 setExams([
-                    ...(availableRes.content || []),
-                    ...(upcomingRes.content || [])
+                    ...(availableData.content || []),
+                    ...(upcomingData.content || [])
                 ]);
 
                 setLoading(false);
@@ -68,7 +77,7 @@ const Calendar = ({ currentMonthYear, calendarDays }) => {
                 setErrorMsg("Không thể tải danh sách đề thi từ server.");
                 setLoading(false);
             });
-    }, [user]);
+    }, [user, navigate, logout]);
 
     const rows = Array.from({ length: 5 }, (_, rowIndex) => rowIndex + 1);
     const daysInRow = Array.from({ length: 7 }, (_, dayIndex) => dayIndex + 1);
@@ -147,9 +156,9 @@ const Calendar = ({ currentMonthYear, calendarDays }) => {
                                                     <div className="event-popup">
                                                         {exams.map((exam) => (
                                                             <div key={`popup-${exam.examId}`} style={{ marginBottom: '4px', borderBottom: '1px solid #444', paddingBottom: '4px' }}>
-                                                                <strong style={{ color: '#fff' }}>{exam.examName}</strong> {/* 🌟 Đổi từ exam.title -> exam.examName */}
+                                                                <strong style={{ color: '#fff' }}>{exam.examName}</strong>
                                                                 <div style={{ fontSize: '11px', color: '#aaa', marginTop: '2px' }}>
-                                                                    ⏱️ {exam.durationMinutes} phút | 📝 {exam.questionAmount || 0} câu {/* 🌟 Đổi sang durationMinutes và questionAmount */}
+                                                                    ⏱️ {exam.durationMinutes} phút | 📝 {exam.questionAmount || 0} câu
                                                                 </div>
                                                             </div>
                                                         ))}

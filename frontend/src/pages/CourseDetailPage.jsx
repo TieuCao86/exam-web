@@ -6,7 +6,7 @@ import '../css/CourseDetail.css';
 export default function CourseDetailPage() {
     const { courseId } = useParams();
     const navigate = useNavigate();
-    const { user } = useAuth();
+    const { user, logout } = useAuth(); // Lấy hàm logout từ AuthContext để dọn sạch session rác
 
     const [course, setCourse] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -23,6 +23,7 @@ export default function CourseDetailPage() {
         const BASE_URL = isProd ? 'https://exam-web-0jf4.onrender.com' : 'http://localhost:8080';
 
         setLoading(true);
+        setErrorMsg('');
 
         fetch(`${BASE_URL}/api/student/courses/${courseId}?userId=${user.id}`, {
             method: 'GET',
@@ -32,20 +33,30 @@ export default function CourseDetailPage() {
                 'X-Requested-With': 'XMLHttpRequest'
             }
         })
-            .then(res => {
+            .then(async (res) => {
+                // CHẶN ĐỨT LỖI TREO GIAO DIỆN KHI RESTART SERVER BACKEND:
+                if (res.status === 401 || res.status === 403) {
+                    console.warn("Phiên đăng nhập hết hạn do máy chủ khởi động lại. Tự động chuyển hướng...");
+                    logout(); // Xóa sạch thông tin cũ trong localStorage và đưa user về null
+                    navigate('/login'); // Ép chuyển hướng về màn hình đăng nhập
+                    return null;
+                }
+
                 if (!res.ok) throw new Error("Không thể tải thông tin khóa học.");
                 return res.json();
             })
             .then(data => {
-                setCourse(data);
-                setLoading(false);
+                if (data) { // Nếu không bị đá sang trang login (data !== null)
+                    setCourse(data);
+                    setLoading(false);
+                }
             })
             .catch(err => {
                 console.error(err);
                 setErrorMsg("Lỗi hệ thống khi tải chi tiết khóa học.");
                 setLoading(false);
             });
-    }, [courseId, user]);
+    }, [courseId, user, navigate, logout]);
 
     const formatDateTime = (dateStr) => {
         if (!dateStr) return '';

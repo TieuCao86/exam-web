@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import '../css/ExamList.css'; // File CSS của bạn ở bên dưới
+import '../css/ExamList.css';
 
 export default function ExamListPage() {
     const navigate = useNavigate();
-    const { user } = useAuth();
+    const { user, logout } = useAuth(); // Lấy thêm hàm logout từ Context
 
     const [exams, setExams] = useState([]);
     const [currentPage, setCurrentPage] = useState(0);
@@ -38,21 +38,31 @@ export default function ExamListPage() {
                 'X-Requested-With': 'XMLHttpRequest'
             }
         })
-            .then(res => {
+            .then(async (res) => {
+                // CHẶN ĐỨT LỖI TREO GIAO DIỆN KHI RESTART SERVER BACKEND:
+                if (res.status === 401 || res.status === 403) {
+                    console.warn("Phiên đăng nhập hết hạn do máy chủ khởi động lại. Tự động chuyển hướng...");
+                    logout(); // Xóa sạch thông tin cũ trong localStorage
+                    navigate('/login'); // Ép chuyển hướng về màn hình đăng nhập
+                    return null;
+                }
+
                 if (!res.ok) throw new Error("Không thể tải danh sách kỳ thi.");
                 return res.json();
             })
             .then(data => {
-                setExams(data.content || []);
-                setTotalPages(data.totalPages || 1);
-                setLoading(false);
+                if (data) { // Nếu không phải trường hợp bị văng session (data !== null)
+                    setExams(data.content || []);
+                    setTotalPages(data.totalPages || 1);
+                    setLoading(false);
+                }
             })
             .catch(err => {
                 console.error(err);
                 setErrorMsg("Lỗi hệ thống khi kết nối dữ liệu lịch thi.");
                 setLoading(false);
             });
-    }, [user, currentPage, activeTab]); // Tự động reload khi đổi trang hoặc đổi Tab lọc
+    }, [user, currentPage, activeTab, navigate, logout]); // Thêm đầy đủ dependency
 
     const handleTabChange = (e) => {
         setActiveTab(e.target.value);
@@ -70,7 +80,7 @@ export default function ExamListPage() {
                 <h2>CÁC KÌ THI CỦA BẠN</h2>
             </div>
 
-            {/* ACTION BAR LỌC TRẠNG THÁI (Mapping trực tiếp với API của bạn) */}
+            {/* ACTION BAR LỌC TRẠNG THÁI */}
             <div className="action-bar">
                 <div>
                     <label>

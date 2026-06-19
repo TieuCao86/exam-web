@@ -12,13 +12,23 @@ export const AuthProvider = ({ children }) => {
     });
 
     // Hàm xử lý khi Đăng nhập thành công
-    const login = (userData) => {
+    // Thay thế hàm login cũ trong AuthContext.js
+    const login = (userData, callback) => {
+        console.log("LOGIN CALLED", userData);
+
         localStorage.setItem("user", JSON.stringify(userData));
+
+        console.log("AFTER SAVE:", localStorage.getItem("user"));
+
         setUser(userData);
+
+        if (callback) callback();
     };
 
     // Hàm xử lý khi Đăng xuất
     const logout = () => {
+        console.trace("LOGOUT CALLED");
+
         localStorage.removeItem("user");
         setUser(null);
     };

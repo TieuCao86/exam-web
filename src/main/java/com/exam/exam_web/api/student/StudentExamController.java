@@ -97,7 +97,13 @@ public class StudentExamController {
     public ExamAttemptHistoryDTO startExam(
             @PathVariable String examId,
             @RequestParam String userId) {
-        return examHistoryService.startExam(userId, examId);
+
+        // Đảm bảo đưa chuỗi khóa định danh duy nhất vào String Pool
+        String lockKey = (userId + "_" + examId).intern();
+
+        synchronized (lockKey) {
+            return examHistoryService.startExam(userId, examId);
+        }
     }
 
     // Ghi nhận hành vi gian lận (Rời tab/Thoát toàn màn hình)

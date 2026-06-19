@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import '../css/Login.css';
 
 export default function Login() {
     const navigate = useNavigate();
-    const { login } = useAuth();
+    const { login, logout } = useAuth(); // Lấy thêm logout để làm sạch dữ liệu cũ
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [errorMsg, setErrorMsg] = useState('');
@@ -42,9 +42,14 @@ export default function Login() {
             if (response.status === 200 || response.ok) {
                 const userData = await response.json();
 
+                console.log("USER DATA:", userData);
+
                 login(userData);
 
-                navigate("/calendar");
+                setTimeout(() => {
+                    navigate("/calendar", { replace: true });
+                }, 50);
+
             } else if (response.status === 401) {
                 setErrorMsg('Tài khoản hoặc mật khẩu không chính xác.');
             } else {

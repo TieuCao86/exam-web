@@ -3,17 +3,25 @@ import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
-    const { user, isAuthenticated } = useAuth();
+    const { user } = useAuth();
 
-    console.log("PROTECTED ROUTE CHECKING. User:", user);
+    console.log("STATE USER:", user);
+    console.log("LOCAL STORAGE:", localStorage.getItem("user"));
 
-    // 1. Kiểm tra đăng nhập
-    if (!isAuthenticated) {
+    const activeUser =
+        user ||
+        JSON.parse(localStorage.getItem("user"));
+
+    console.log("ACTIVE USER:", activeUser);
+
+    if (!activeUser) {
         return <Navigate to="/login" replace />;
     }
 
-    // 2. Kiểm tra phân quyền
-    if (allowedRoles && !allowedRoles.includes(user?.role)) {
+    if (
+        allowedRoles &&
+        !allowedRoles.includes(activeUser.role)
+    ) {
         return <Navigate to="/403" replace />;
     }
 

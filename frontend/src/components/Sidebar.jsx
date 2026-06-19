@@ -84,8 +84,8 @@ const Sidebar = ({ menus = [], currentPath }) => {
 
                     {/* 5. Icon Logout gán sự kiện click */}
                     <i
-                        className="fas fa-book logout-icon"
-                        title="Đăng xuất"
+                        className="fas fa-sign-out-alt logout-icon"
+                        title="Đăng xuất khỏi hệ thống"
                         onClick={handleLogout}
                     />
                 </div>

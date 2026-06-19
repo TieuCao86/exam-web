@@ -1,20 +1,22 @@
 import { useEffect, useState } from "react";
 import CourseList from "../components/CourseList";
-import {useAuth} from "../context/AuthContext.jsx";
+import { useAuth } from "../context/AuthContext.jsx";
+import { useNavigate } from "react-router-dom"; // Import thêm useNavigate để điều hướng
 
 const API_BASE = import.meta.env.PROD
     ? "https://exam-web-0jf4.onrender.com"
     : "http://localhost:8080";
 
 export default function CoursePage() {
-
+    const navigate = useNavigate();
     const [courses, setCourses] = useState([]);
     const [currentPage, setCurrentPage] = useState(0);
     const [hasNext, setHasNext] = useState(false);
 
-    const { user } = useAuth();
+    const { user, logout } = useAuth(); // Lấy thêm hàm logout từ Context
 
     const loadCourses = async (page = 0) => {
+        if (!user || !user.id) return;
 
         try {
             const response = await fetch(
@@ -28,6 +30,14 @@ export default function CoursePage() {
                     }
                 }
             );
+
+            // CHẶN ĐỨT LỖI TREO GIAO DIỆN KHI RESTART SERVER BACKEND:
+            if (response.status === 401 || response.status === 403) {
+                console.warn("Phiên đăng nhập hết hạn do máy chủ khởi động lại. Tự động chuyển hướng...");
+                logout(); // Xóa sạch thông tin user cũ trong localStorage
+                navigate('/login'); // Ép quay lại màn hình đăng nhập
+                return;
+            }
 
             if (!response.ok) {
                 throw new Error(`Server returned status ${response.status}`);
@@ -45,7 +55,7 @@ export default function CoursePage() {
 
     useEffect(() => {
         loadCourses(0);
-    }, []);
+    }, [user]); // Bổ sung user vào dependency array để chạy đúng khi thông tin user sẵn sàng
 
     const handlePageChange = (page) => {
         loadCourses(page);

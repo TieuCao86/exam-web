@@ -199,9 +199,16 @@ public class ExamHistoryServiceImpl implements ExamHistoryService {
         return examHistoryRepository.findSubmissionsByExamId(examId);
     }
 
-    // ================= START EXAM FIXES =================
+    // ================= START EXAM =================
     @Override
+    @Transactional
     public ExamAttemptHistoryDTO startExam(String userId, String examId) {
+
+        // Kiểm tra an toàn bọc lót tầng dưới (Mặc dù Controller đã khóa đồng bộ)
+        java.util.Optional<ExamHistory> currentAttempt = examHistoryRepository.findCurrentAttempt(userId, examId);
+        if (currentAttempt.isPresent()) {
+            return examAttemptHistoryMapper.toDTO(currentAttempt.get());
+        }
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -217,6 +224,8 @@ public class ExamHistoryServiceImpl implements ExamHistoryService {
         history.setAttemptNumber(nextAttempt);
         history.setSubmittedAt(null);
         history.setScore(0.0);
+        history.setCreatedAt(LocalDateTime.now()); // Không được để NULL tránh lỗi 500 khi tính toán thời gian còn lại
+        history.setCheatCount(0);
 
         ExamHistory saved = examHistoryRepository.save(history);
 
@@ -224,17 +233,23 @@ public class ExamHistoryServiceImpl implements ExamHistoryService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public int getRemainingSeconds(String userId, String examId) {
         // 1. Tìm lượt thi hiện tại đang diễn ra (chưa nộp bài) của sinh viên
-        ExamHistory history = examHistoryRepository.findCurrentAttempt(userId, examId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy lượt làm bài nào đang diễn ra cho đề thi này"));
+        // Nếu không thấy (có thể do StrictMode hủy luồng hoặc lỗi DB), bọc lót trả về thời gian gốc của đề thay vì ném lỗi 500
+        ExamHistory history = examHistoryRepository.findCurrentAttempt(userId, examId).orElse(null);
+
+        if (history == null) {
+            Exam exam = examRepository.findById(examId).orElse(null);
+            return exam != null ? exam.getDurationMinutes() * 60 : 45 * 60;
+        }
 
         // Nếu bài thi này đã có mốc nộp bài, thời gian còn lại bằng 0
         if (history.getSubmittedAt() != null) {
             return 0;
         }
 
-        // 2. Lấy mốc thời gian bắt đầu (createdAt)
+        // 2. Lấy mốc thời gian bắt đầu
         java.time.LocalDateTime startTime = history.getCreatedAt();
         if (startTime == null) {
             return history.getExam().getDurationMinutes() * 60; // Bọc lót dữ liệu lỗi

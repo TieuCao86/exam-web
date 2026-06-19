@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import '../css/ExamDetail.css'; // File CSS của bạn ở bên dưới
+import '../css/ExamDetail.css';
 
 export default function ExamDetailPage() {
     const { examId } = useParams();
     const navigate = useNavigate();
-    const { user } = useAuth();
+    const { user, logout } = useAuth(); // Lấy thêm hàm logout từ Context để tự động clear session rác
 
     const [exam, setExam] = useState(null);
     const [attempts, setAttempts] = useState([]);
@@ -30,21 +30,38 @@ export default function ExamDetailPage() {
 
         // Gọi song song 2 API: Chi tiết cấu hình đề thi & Lịch sử các lần làm bài của sinh viên
         Promise.all([
-            fetch(`${BASE_URL}/api/student/exams/${examId}`, { credentials: 'include' }).then(res => res.json()),
-            fetch(`${BASE_URL}/api/student/exams/${examId}/attempts?userId=${user.id}`, { credentials: 'include' }).then(res => res.json())
+            fetch(`${BASE_URL}/api/student/exams/${examId}`, { credentials: 'include' }),
+            fetch(`${BASE_URL}/api/student/exams/${examId}/attempts?userId=${user.id}`, { credentials: 'include' })
         ])
+            .then(async ([examRes, attemptsRes]) => {
+                // CHẶN ĐỨT LỖI TREO GIAO DIỆN KHI RESTART SERVER BACKEND:
+                if (examRes.status === 401 || examRes.status === 403 || attemptsRes.status === 401 || attemptsRes.status === 403) {
+                    console.warn("Phiên đăng nhập hết hạn do máy chủ khởi động lại. Tự động chuyển hướng...");
+                    logout(); // Xóa sạch thông tin cũ trong localStorage
+                    navigate('/login'); // Ép chuyển hướng về màn hình đăng nhập
+                    return [null, null];
+                }
+
+                if (!examRes.ok) throw new Error("Exam Detail API error: " + examRes.status);
+                if (!attemptsRes.ok) throw new Error("Attempts API error: " + attemptsRes.status);
+
+                const examData = await examRes.json();
+                const attemptsData = await attemptsRes.json();
+                return [examData, attemptsData];
+            })
             .then(([examData, attemptsData]) => {
-                setExam(examData);
-                // API attempts trả về List<ExamAttemptHistoryDTO>
-                setAttempts(attemptsData || []);
-                setLoading(false);
+                if (examData && attemptsData) {
+                    setExam(examData);
+                    setAttempts(attemptsData || []);
+                    setLoading(false);
+                }
             })
             .catch(err => {
                 console.error(err);
                 setErrorMsg("Lỗi hệ thống khi kết nối thông tin bài thi.");
                 setLoading(false);
             });
-    }, [examId, user]);
+    }, [examId, user, navigate, logout]);
 
     // Tìm điểm cao nhất từ danh sách các lần làm bài (Best Score)
     const getBestScore = () => {
@@ -68,7 +85,7 @@ export default function ExamDetailPage() {
 
         const now = new Date();
         const closeDate = new Date(closeDateStr);
-        const diffMs = closeDate - now; // Khoảng cách tính bằng miligiây
+        const diffMs = closeDate - now;
 
         if (diffMs <= 0) {
             return <strong style={{ color: '#dc3545' }}>Đã hết hạn nộp bài</strong>;
@@ -83,7 +100,7 @@ export default function ExamDetailPage() {
         if (hours > 0 || days > 0) result += `${hours} giờ `;
         result += `${minutes} phút`;
 
-        return <strong style={{ color: '#ffc107' }}>{result}</strong>; // màu vàng cam nổi bật
+        return <strong style={{ color: '#ffc107' }}>{result}</strong>;
     };
 
     // Xử lý nộp bài tập file tự luận (FILE_UPLOAD)
@@ -105,9 +122,15 @@ export default function ExamDetailPage() {
                 body: formData
             });
 
+            if (response.status === 401 || response.status === 403) {
+                logout();
+                navigate('/login');
+                return;
+            }
+
             if (response.ok) {
                 alert("Nộp bài tập file thành công!");
-                window.location.reload(); // Reload lại dữ liệu trạng thái mới nhất
+                window.location.reload();
             } else {
                 alert("Nộp bài thất bại. Vui lòng thử lại.");
             }
@@ -140,9 +163,7 @@ export default function ExamDetailPage() {
                     {exam.description ? (
                         <ul style={{ margin: 0, paddingLeft: '20px', listStyleType: 'disc' }}>
                             {exam.description.split('\n').map((line, index) => {
-                                // Loại bỏ khoảng trắng thừa ở hai đầu dòng text
                                 const trimmedLine = line.trim();
-                                // Nếu dòng rỗng thì bỏ qua không render
                                 if (!trimmedLine) return null;
 
                                 return (
@@ -172,7 +193,6 @@ export default function ExamDetailPage() {
                             <span>Đóng lúc:</span>
                             <strong>{formatDateTime(exam.closeDate)}</strong>
                         </div>
-                        {/* DÒNG MỚI ĐƯỢC THÊM VÀO ĐÂY */}
                         <div className="status-row">
                             <span>Thời gian còn lại:</span>
                             {getRemainingTime(exam.closeDate)}
@@ -222,9 +242,7 @@ export default function ExamDetailPage() {
                 </div>
             </div>
 
-            {/* ===================================================== */}
-            {/* VÙNG ACTION CHO FILE UPLOAD */}
-            {/* ===================================================== */}
+            {/* ACTION CHO FILE UPLOAD */}
             {isFileUpload && (
                 <div className="content-card">
                     <h3>Nộp bài tập tự luận</h3>
@@ -244,9 +262,7 @@ export default function ExamDetailPage() {
                 </div>
             )}
 
-            {/* ===================================================== */}
-            {/* VÙNG ACTION CHO MULTIPLE CHOICE */}
-            {/* ===================================================== */}
+            {/* ACTION CHO MULTIPLE CHOICE */}
             {isMultipleChoice && (
                 <div className="content-card">
                     <div className="quiz-action" style={{ display: 'flex', flexDirection: "column", alignItems: "flex-start", gap: "15px" }}>
@@ -271,7 +287,6 @@ export default function ExamDetailPage() {
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', marginBottom: '15px' }}>
                         <h3 style={{ margin: 0 }}>Tổng quan các lần làm bài trước</h3>
 
-                        {/* Đã đẩy Điểm tổng kết lên vị trí này */}
                         {bestScore && (
                             <div className="final-score" style={{ fontSize: '15px' }}>
                                 Điểm tổng kết hệ thống:&nbsp;

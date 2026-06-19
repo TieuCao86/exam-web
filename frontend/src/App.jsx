@@ -8,6 +8,7 @@ import CoursePage from "./pages/CoursePage";
 import CourseDetailPage from "./pages/CourseDetailPage.jsx";
 import ExamListPage from "./pages/ExamListPage.jsx";
 import ExamDetailPage from "./pages/ExamDetailPage.jsx";
+import TakeExamPage from "./pages/TakeExamPage.jsx";
 
 function App() {
 
@@ -77,6 +78,17 @@ function App() {
                     <ProtectedRoute allowedRoles={["STUDENT"]}>
                         <MainLayout menus={mockMenus} currentPath="/exams">
                             <ExamDetailPage />
+                        </MainLayout>
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/exams/:examId/start"
+                element={
+                    <ProtectedRoute allowedRoles={["STUDENT"]}>
+                        <MainLayout menus={mockMenus} currentPath="/exams">
+                            <TakeExamPage />
                         </MainLayout>
                     </ProtectedRoute>
                 }
